@@ -214,7 +214,32 @@
 (defun combine-elt-lst (elt lst)
 	(if (or (null elt) (null lst)) '()
 	(combine-elt-lst-rec elt lst)))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; combine-lst-lst-rec
+;;; Funcion recursiva para el producto cartesiano de dos listas 
+;;;
+;;; INPUT: lst1: primera lista
+;;;        lst2: segunda lista
+;;;
+;;; OUTPUT: producto cartesiano de las dos listas	
+(defun combine-lst-lst-rec (lst1 lst2)
+	(if (= 1 (length lst1)) (combine-elt-lst-rec (car lst1) lst2)
+	(union-rec (combine-elt-lst-rec (car lst1) lst2) (combine-lst-lst-rec (cdr lst1) lst2))))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; union-rec
+;;; "Fusiona" las dos listas.
+;;; Acabamos obteniendo una lista con los elementos de la primera y despues
+;;; los de la segunda, en este orden, y respetando el orden inicial de cada lista.
+;;;
+;;; INPUT: lst1: primera lista
+;;;        lst2: segunda lista
+;;;
+;;; OUTPUT: union de las dos listas
+(defun union-rec (lst1 lst2)
+	(if (= 1 (length lst1)) (cons (car lst1) lst2)
+	(cons (car lst1) (union-rec (cdr lst1) lst2))))
+	
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; combine-lst-lst
 ;;; Calcula el producto cartesiano de dos listas
@@ -224,9 +249,8 @@
 ;;;
 ;;; OUTPUT: producto cartesiano de las dos listas
 (defun combine-lst-lst (lst1 lst2)
-  )
-
-
+	(if (or (null lst1) (null lst2)) '()
+	(combine-lst-lst-rec lst1 lst2)))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; combine-list-of-lsts
 ;;; Calcula todas las posibles disposiciones de elementos
