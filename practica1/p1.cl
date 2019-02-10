@@ -15,9 +15,7 @@
   (if (or(null x)(null y))
     0
     (+(* (car x) (car y))
-    (scalar-product (cdr x) (cdr y)))
-    )
-  )
+    (scalar-product (cdr x) (cdr y)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; cosine-distance-rec (x y)
@@ -31,12 +29,11 @@
 (defun cosine-distance-rec (x y)
 
   (let ((xy  (scalar-product x y)) (xx (scalar-product x x)) (yy (scalar-product y y)))
-    (if (or (equal 0 xx) (equal 0 yy))
+    (if (or (= 0 xx) (= 0 yy))
     nil
     (- 1 (/ xy
     (* (sqrt xx)
-    (sqrt yy)))))
-  ))
+    (sqrt yy)))))))
   
  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; scalar-product-mapcar (x y)
@@ -50,8 +47,7 @@
 ;;;
 (defun scalar-product-mapcar (x y)
 	(if (or (null x) (null y)) 0
-	(apply #'+ (mapcar #'* x y)))
-)
+	(apply #'+ (mapcar #'* x y))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; cosine-distance-mapcar
@@ -64,11 +60,10 @@
 ;;;
 (defun cosine-distance-mapcar (x y)
 	(let((xy (scalar-product-mapcar x y)) (xx (scalar-product-mapcar x x)) (yy (scalar-product-mapcar y y)))
-		(if (or (equal 0 xx) (equal 0 yy)) nil
+		(if (or (= 0 xx) (= 0 yy)) nil
 		(- 1 (/ xy
 		(* (sqrt xx)
-		(sqrt yy))))))
-  )
+		(sqrt yy)))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; simil-vector-lst
@@ -84,8 +79,7 @@
 (defun simil-vector-lst (x lst confidence)
 	(mapcan #'(lambda(y)
 				(let ((sim (cosine-distance-mapcar x y))) 
-				(if (>= sim confidence) (list (list y sim))))) lst)
-)
+				(if (>= sim confidence) (list (list y sim))))) lst))
   
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; order-vectors-cosine-distance
@@ -100,11 +94,7 @@
 ;;;
 (defun order-vectors-cosine-distance (vector lst-of-vectors &optional (confidence-level 0))
 	(if (or (null vector) (null lst-of-vectors) (> confidence-level 1) (< confidence-level 0))  nil
-		(mapcar #'first (sort (simil-vector-lst vector lst-of-vectors confidence-level) #'> :key #'second))	
-	)
-  )
-
-
+		(mapcar #'first (sort (simil-vector-lst vector lst-of-vectors confidence-level) #'> :key #'second))))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; get-vectors-category (categories vectors distance-measure)
 ;;; Clasifica a los textos en categorias .
@@ -200,6 +190,19 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; combine-elt-lst-rec
+;;; Combina un elemento dado con todos los elementos de una lista de manera recursiva
+;;;
+;;; INPUT: elem: elemento a combinar
+;;;        lst: lista con la que se quiere combinar el elemento
+;;;
+;;; OUTPUT: lista con las combinacion del elemento con cada uno de los
+;;;         de la lista 
+(defun combine-elt-lst-rec (elt lst)
+	(if (= 1 (length lst)) (list (list elt (car lst)))
+	(cons (list elt (car lst)) (combine-elt-lst-rec elt (cdr lst)))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; combine-elt-lst
 ;;; Combina un elemento dado con todos los elementos de una lista
 ;;;
@@ -209,7 +212,8 @@
 ;;; OUTPUT: lista con las combinacion del elemento con cada uno de los
 ;;;         de la lista
 (defun combine-elt-lst (elt lst)
-  )
+	(if (or (null elt) (null lst)) '()
+	(combine-elt-lst-rec elt lst)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; combine-lst-lst
