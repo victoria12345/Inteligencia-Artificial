@@ -37,6 +37,21 @@
     (* (sqrt xx)
     (sqrt yy)))))
   ))
+  
+ ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; scalar-product-mapcar (x y)
+;;; Calcula el producto escalar de dos vectores.
+;;; En vez de recursivamente, utilizando "mapcar"
+;;; Se asume que los dos vectores de entrada tienen la misma longitud.
+;;;
+;;; INPUT: x: vector, representado como una lista
+;;;         y: vector, representado como una lista
+;;; OUTPUT: producto escalar entre x e y
+;;;
+(defun scalar-product-mapcar (x y)
+	(if (or (null x) (null y)) 0
+	(apply #'+ (mapcar #'* x y)))
+)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; cosine-distance-mapcar
@@ -48,7 +63,11 @@
 ;;; OUTPUT: distancia coseno entre x e y
 ;;;
 (defun cosine-distance-mapcar (x y)
-
+	(let((xy (scalar-product-mapcar x y)) (xx (scalar-product-mapcar x x)) (yy (scalar-product-mapcar y y)))
+		(if (or (= 0 xx) (= 0 yy)) nil
+		(- 1 (/ xy
+		(* (sqrt xx)
+		(sqrt yy))))))
   )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
