@@ -31,7 +31,7 @@
 (defun cosine-distance-rec (x y)
 
   (let ((xy  (scalar-product x y)) (xx (scalar-product x x)) (yy (scalar-product y y)))
-    (if (or (= 0 xx) (= 0 yy))
+    (if (or (equal 0 xx) (equal 0 yy))
     nil
     (- 1 (/ xy
     (* (sqrt xx)
@@ -64,12 +64,29 @@
 ;;;
 (defun cosine-distance-mapcar (x y)
 	(let((xy (scalar-product-mapcar x y)) (xx (scalar-product-mapcar x x)) (yy (scalar-product-mapcar y y)))
-		(if (or (= 0 xx) (= 0 yy)) nil
+		(if (or (equal 0 xx) (equal 0 yy)) nil
 		(- 1 (/ xy
 		(* (sqrt xx)
 		(sqrt yy))))))
   )
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; simil-vector-lst
+;;; Lista de vectores y su similaridad.
+;;; Solo van a pertenecer a esta lista los que superen el niveld e confianza
+;;; INPUT:  vector: vector que representa a una categoria,
+;;;                 representado como una lista
+;;;         lst-of-vectors vector de vectores
+;;;         confidence: Nivel de confianza
+;;; OUTPUT: Lista de tuplas (vector similitud)
+;;;
+
+(defun simil-vector-lst (x lst confidence)
+	(mapcan #'(lambda(y)
+				(let ((sim (cosine-distance-mapcar x y))) 
+				(if (>= sim confidence) (list (list y sim))))) lst)
+)
+  
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; order-vectors-cosine-distance
 ;;; Devuelve aquellos vectores similares a una categoria
@@ -82,6 +99,9 @@
 ;;;         ordenados
 ;;;
 (defun order-vectors-cosine-distance (vector lst-of-vectors &optional (confidence-level 0))
+	(if (or (null vector) (null lst-of-vectors) (> confidence-level 1) (< confidence-level 0))  nil
+		(mapcar #'first (sort (simil-vector-lst vector lst-of-vectors confidence-level) #'> :key #'second))	
+	)
   )
 
 
