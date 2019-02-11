@@ -190,19 +190,6 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; combine-elt-lst-rec
-;;; Combina un elemento dado con todos los elementos de una lista de manera recursiva
-;;;
-;;; INPUT: elem: elemento a combinar
-;;;        lst: lista con la que se quiere combinar el elemento
-;;;
-;;; OUTPUT: lista con las combinacion del elemento con cada uno de los
-;;;         de la lista 
-(defun combine-elt-lst-rec (elt lst)
-	(if (= 1 (length lst)) (list (list elt (car lst)))
-	(cons (list elt (car lst)) (combine-elt-lst-rec elt (cdr lst)))))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; combine-elt-lst
 ;;; Combina un elemento dado con todos los elementos de una lista
 ;;;
@@ -212,34 +199,9 @@
 ;;; OUTPUT: lista con las combinacion del elemento con cada uno de los
 ;;;         de la lista
 (defun combine-elt-lst (elt lst)
-	(if (or (null elt) (null lst)) '()
-	(combine-elt-lst-rec elt lst)))
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; combine-lst-lst-rec
-;;; Funcion recursiva para el producto cartesiano de dos listas 
-;;;
-;;; INPUT: lst1: primera lista
-;;;        lst2: segunda lista
-;;;
-;;; OUTPUT: producto cartesiano de las dos listas	
-(defun combine-lst-lst-rec (lst1 lst2)
-	(if (= 1 (length lst1)) (combine-elt-lst-rec (car lst1) lst2)
-	(union-rec (combine-elt-lst-rec (car lst1) lst2) (combine-lst-lst-rec (cdr lst1) lst2))))
+	(if (null lst) '()
+	(mapcar #'(lambda(x) (list elt x)) lst)))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; union-rec
-;;; "Fusiona" las dos listas.
-;;; Acabamos obteniendo una lista con los elementos de la primera y despues
-;;; los de la segunda, en este orden, y respetando el orden inicial de cada lista.
-;;;
-;;; INPUT: lst1: primera lista
-;;;        lst2: segunda lista
-;;;
-;;; OUTPUT: union de las dos listas
-(defun union-rec (lst1 lst2)
-	(if (= 1 (length lst1)) (cons (car lst1) lst2)
-	(cons (car lst1) (union-rec (cdr lst1) lst2))))
-	
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; combine-lst-lst
 ;;; Calcula el producto cartesiano de dos listas
@@ -249,8 +211,38 @@
 ;;;
 ;;; OUTPUT: producto cartesiano de las dos listas
 (defun combine-lst-lst (lst1 lst2)
-	(if (or (null lst1) (null lst2)) '()
-	(combine-lst-lst-rec lst1 lst2)))
+	(mapcan #'(lambda(x) (combine-elt-lst x lst2)) lst1 ))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; combine-elt-lst-aux
+;;; Combina un elemento dado con todos los elementos de una lista
+;;; Igual a combine-elt-lst pero utilizamos la funcion "cons" para evitar
+;;; problemas de parentesis
+;;; Creaada como funcion auxiliar de combine-list-of-lsts
+;;;
+;;; INPUT: elem: elemento a combinar
+;;;        lst: lista con la que se quiere combinar el elemento
+;;;
+;;; OUTPUT: lista con las combinacion del elemento con cada uno de los
+;;;         de la lista	
+(defun combine-elt-lst-aux (elt lst)
+	(if (null lst) '()
+	(mapcar #'(lambda(x) (cons elt x)) lst)))
+	
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; combine-list-of-lsts-aux
+;;; Funcion auxiliar que combina todos los elementos de dos listas
+;;; Utiliza la funcion combine-elt-lst-aux, creada especificamente para
+;;; este ejercicio y que no haya "problemas de parentesis"
+;;;
+;;; INPUT: lst1: lista 1
+;;;        lst2: lista 2 
+;;;
+;;; OUTPUT: lista con todas las posibles combinaciones de elementos
+(defun combine-list-of-lsts-aux (lst1 lst2)
+	(mapcan #'(lambda(x) (combine-elt-lst-aux x lst2)) lst1))
+
+	
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; combine-list-of-lsts
 ;;; Calcula todas las posibles disposiciones de elementos
@@ -261,9 +253,8 @@
 ;;;
 ;;; OUTPUT: lista con todas las posibles combinaciones de elementos
 (defun combine-list-of-lsts (lstolsts)
-  )
-
-
+	(if (null (cdr lstolsts)) (mapcar #'list (car lstolsts))
+	(combine-list-of-lsts-aux (car lstolsts) (combine-list-of-lsts (cdr lstolsts)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; EJERCICIO 4
