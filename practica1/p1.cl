@@ -263,7 +263,7 @@
 ;;; OUTPUT: lista con todas las posibles combinaciones de elementos
 (defun combine-list-of-lsts-aux (lst1 lst2)
 	(cond ((null lst1) lst2)
-	((null lst2) lst1)
+	((null lst2) (mapcar #'list lst1))
 	(T (mapcan #'(lambda(x) (combine-elt-lst-aux x lst2)) lst1))))
 	
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
