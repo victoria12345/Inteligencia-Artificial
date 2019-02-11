@@ -12,8 +12,7 @@
 ;;; OUTPUT: producto escalar entre x e y
 ;;;
 (defun scalar-product (x y)
-  (if (or(null x)(null y))
-    0
+  (if (or(null x)(null y)) 0
     (+(* (car x) (car y))
     (scalar-product (cdr x) (cdr y)))))
 
@@ -21,6 +20,7 @@
 ;;; cosine-distance-rec (x y)
 ;;; Calcula la distancia coseno de un vector de forma recursiva
 ;;; Se asume que los dos vectores de entrada tienen la misma longitud.
+;;; Si uno de los dos es el vector 0, se devuelve NIL
 ;;;
 ;;; INPUT: x: vector, representado como una lista
 ;;;         y: vector, representado como una lista
@@ -79,7 +79,7 @@
 (defun simil-vector-lst (x lst confidence)
 	(mapcan #'(lambda(y)
 				(let ((sim (cosine-distance-mapcar x y))) 
-				(if (>= sim confidence) (list (list y sim))))) lst))
+				(if (>= (- 1 confidence) sim) (list (list y sim))))) lst))
   
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; order-vectors-cosine-distance
@@ -94,7 +94,30 @@
 ;;;
 (defun order-vectors-cosine-distance (vector lst-of-vectors &optional (confidence-level 0))
 	(if (or (null vector) (null lst-of-vectors) (> confidence-level 1) (< confidence-level 0))  nil
-		(mapcar #'first (sort (simil-vector-lst vector lst-of-vectors confidence-level) #'> :key #'second))))
+		(mapcar #'first (sort (simil-vector-lst vector lst-of-vectors confidence-level) #'< :key #'second))))
+		
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; cats-simil
+;;; Calcula la distancia coseno de un vector y una lista de categorias
+;;; INPUT:  vector: vector
+;;;         categories: lista de categorias
+;;;         distance-measure: funcion a usar para la distancia coseno
+;;; OUTPUT: Lista de tuplas (categoria distancia)
+;;;
+(defun cats-simil (vector categories distance-measure)
+	(mapcar #'(lambda(x) (list (car x) (funcall distance-measure (cdr vector) (cdr x)))) categories))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; best-cat
+;;; Busca la mejor categoria para un vector
+;;; INPUT:  vector: vector
+;;;         categories: lista de categorias
+;;;         distance-measure: funcion a usar para la distancia coseno
+;;; OUTPUT: Tupla (numero-de-categoria distancia-coseno)
+;;;	
+(defun best-cat (vector categories distance-measure)
+	(car (sort (cats-simil vector categories distance-measure) #'< :key #'second)))
+	
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; get-vectors-category (categories vectors distance-measure)
 ;;; Clasifica a los textos en categorias .
@@ -108,9 +131,8 @@
 ;;;         de menor distancia , junto con el valor de dicha distancia
 ;;;
 ( defun get-vectors-category (categories texts distance-measure)
-  )
-
-
+	(unless (null (car texts))
+		(mapcar #'(lambda(x) (best-cat x categories distance-measure)) texts))) 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; EJERCICIO 2
@@ -240,8 +262,9 @@
 ;;;
 ;;; OUTPUT: lista con todas las posibles combinaciones de elementos
 (defun combine-list-of-lsts-aux (lst1 lst2)
-	(mapcan #'(lambda(x) (combine-elt-lst-aux x lst2)) lst1))
-
+	(cond ((null lst1) lst2)
+	((null lst2) lst1)
+	(T (mapcan #'(lambda(x) (combine-elt-lst-aux x lst2)) lst1))))
 	
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; combine-list-of-lsts
