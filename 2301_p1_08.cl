@@ -203,7 +203,7 @@
 ;;;        semillas : semillas con las que invocar a Newton
 ;;;        tol : tolerancia para convergencia ( parametro opcional )
 ;;;
-;;; OUTPUT: Las raices no nil que se encuentran para las semillas 
+;;; OUTPUT: Las raices no nil que se encuentran para las semillas
 ;;;
 (defun list-not-nil-roots-newton (f df max-iter semillas &optional (tol 0.001))
  (mapcan #'nconc (all-roots-newton f df max-iter semillas tol)))
@@ -332,12 +332,18 @@
   (or (positive-literal-p x)
       (negative-literal-p x)))
 
+(defun expand-bicond (fbf)
+ (list +and+ (list +cond+ (second fbf) (third fbf)) (list +cond+ (list +not+ (second fbf) +not+ (third fbf)))))
 
+(defun expand-cond (fbf)
+  (list +or+ (list +not+ (second fbf)) (third fbf)))
+
+(defun expand-truth-tree-aux (fbf))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; truth-tree
 ;;; Recibe una expresion y construye su arbol de verdad para
 ;;; determinar si es SAT o UNSAT
-;;;
+;;;9
 ;;; INPUT  : fbf - Formula bien formada (FBF) a analizar.
 ;;; OUTPUT : T   - FBF es SAT
 ;;;          N   - FBF es UNSAT
