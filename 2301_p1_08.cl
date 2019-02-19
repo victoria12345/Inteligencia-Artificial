@@ -365,18 +365,53 @@
   (or (positive-literal-p x)
       (negative-literal-p x)))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; expand-bicond
+;;; Recibe una expresion con bicondicional y la transforma en una con
+;;; and's y or's
+;;; determinar si es SAT o UNSAT
+;;;
+;;; INPUT  : fbf - Formula bien formada (FBF) a analizar.
+;;; OUTPUT : fbf - Formula bien formada (FBF) sin bicondicional
+;;;
 (defun expand-bicond (fbf)
- (list +and+ (list +cond+ (second fbf) (third fbf)) (list +cond+ (list +not+ (second fbf) +not+ (third fbf)))))
+ (list +or+ (list +and+ (second fbf) (third fbf)) (list +and+ (list +not+ (second fbf) +not+ (third fbf)))))
 
+ ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; expand-cond
+;;; Recibe una expresion con condicional y la transforma en una con
+;;; and's y or's
+;;; determinar si es SAT o UNSAT
+;;;
+;;; INPUT  : fbf - Formula bien formada (FBF) a analizar.
+;;; OUTPUT : fbf - Formula bien formada (FBF) sin condicional
+;;;
 (defun expand-cond (fbf)
   (list +or+ (list +not+ (second fbf)) (third fbf)))
+  
+  
 
-(defun expand-truth-tree-aux (fbf))
+(defun expand(lst fbf)
+	(if (equal T (bicond-connector-p (first fbf)))
+			(expand-truth-tree-aux lst (list +and+ (expand-bicond fbf))))
+	(expand-truth-tree-aux lst (list +and+ (expand-cond fbf))))
+
+(defun create-childs (lst fbf)
+	(if (equal +or+ (first fbf))
+		(or (expand-truth-tree-aux lst (second fbf)) (expand-truth-tree-aux lst (third fbf)))
+	(expand-truth-tree-aux lst (second fbf))))
+  
+(defun expand-truth-tree-aux (lst fbf)
+	(if (not (literal-p fbf)) 
+		(if (equal T (binary-connector-p (first fbf)))
+			(expand-truth-tree-aux lst (expand lst fbf))
+		(create-childs lst fbf))
+	(cons fbf lst)))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; truth-tree
 ;;; Recibe una expresion y construye su arbol de verdad para
 ;;; determinar si es SAT o UNSAT
-;;;9
+;;;
 ;;; INPUT  : fbf - Formula bien formada (FBF) a analizar.
 ;;; OUTPUT : T   - FBF es SAT
 ;;;          N   - FBF es UNSAT
