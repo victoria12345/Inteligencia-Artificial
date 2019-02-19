@@ -17,6 +17,20 @@
     (scalar-product (cdr x) (cdr y)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; formula-cos-dis
+;;; Aplica la formula de la distancia coseno
+;;;
+;;; INPUT: xx: norma del vector x
+;;;        yy: norma del vector y
+;;;		   xy: producto escalar de x e y
+;;; OUTPUT: coseno distancua entre x e y
+;;;
+(defun formula-cos-dis (xx yy xy)
+	(- 1 (/ xy
+    (* (sqrt xx)
+    (sqrt yy)))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; cosine-distance-rec (x y)
 ;;; Calcula la distancia coseno de un vector de forma recursiva
 ;;; Se asume que los dos vectores de entrada tienen la misma longitud.
@@ -30,11 +44,9 @@
   (let ((xy  (scalar-product x y)) (xx (scalar-product x x)) (yy (scalar-product y y)))
     (if (or (= 0 xx) (= 0 yy))
     nil
-    (- 1 (/ xy
-    (* (sqrt xx)
-    (sqrt yy)))))))
+    (formula-cos-dis xx yy xy))))
 
- ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; scalar-product-mapcar (x y)
 ;;; Calcula el producto escalar de dos vectores.
 ;;; En vez de recursivamente, utilizando "mapcar"
@@ -59,10 +71,9 @@
 ;;;
 (defun cosine-distance-mapcar (x y)
 	(let((xy (scalar-product-mapcar x y)) (xx (scalar-product-mapcar x x)) (yy (scalar-product-mapcar y y)))
-		(if (or (= 0 xx) (= 0 yy)) nil
-		(- 1 (/ xy
-		(* (sqrt xx)
-		(sqrt yy)))))))
+	(if (or (= 0 xx) (= 0 yy))
+	nil
+		(formula-cos-dis xx yy xy))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; simil-vector-lst
@@ -74,12 +85,22 @@
 ;;;         confidence: Nivel de confianza
 ;;; OUTPUT: Lista de tuplas (vector similitud)
 ;;;
-
 (defun simil-vector-lst (x lst confidence)
 	(mapcan #'(lambda(y)
 				(let ((sim (cosine-distance-mapcar x y)))
 				(if (>= (- 1 confidence) sim) (list (list y sim))))) lst))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; copia-lista
+;;; Devuelve una copia de una lista
+;;; INPUT:  lst: lista que queremos copiar
+;;; OUTPUT: Una lista que es una copia de lst
+;;;				
+(defun copia-lista (lst)
+  	(if (atom lst)
+		lst
+		(cons (car lst) (copia-lista (cdr lst)))))
+				
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; order-vectors-cosine-distance
 ;;; Devuelve aquellos vectores similares a una categoria
@@ -93,7 +114,7 @@
 ;;;
 (defun order-vectors-cosine-distance (vector lst-of-vectors &optional (confidence-level 0))
 	(if (or (null vector) (null lst-of-vectors) (> confidence-level 1) (< confidence-level 0))  nil
-		(mapcar #'first (sort (simil-vector-lst vector lst-of-vectors confidence-level) #'< :key #'second))))
+		(mapcar #'first (sort (copia-lista (simil-vector-lst vector lst-of-vectors confidence-level)) #'< :key #'second))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; cats-simil
@@ -115,7 +136,7 @@
 ;;; OUTPUT: Tupla (numero-de-categoria distancia-coseno)
 ;;;
 (defun best-cat (vector categories distance-measure)
-	(car (sort (cats-simil vector categories distance-measure) #'< :key #'second)))
+	(car (sort (copia-lista (cats-simil vector categories distance-measure)) #'< :key #'second)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; get-vectors-category (categories vectors distance-measure)
@@ -250,7 +271,7 @@
 ;;;         de la lista
 (defun combine-elt-lst-aux (elt lst)
 	(if (null lst) '()
-	(mapcar #'(lambda(x) (cons elt x)) lst)))
+	(mapcar #'(lambda(x)(cons elt x)) lst)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; combine-list-of-lsts-aux
@@ -265,7 +286,19 @@
 (defun combine-list-of-lsts-aux (lst1 lst2)
 	(cond ((null lst1) lst2)
 	((null lst2) lst1)
-	(T (mapcan #'(lambda(x) (combine-elt-lst-aux x lst2)) lst1))))
+	(T (limpiar (mapcar #'(lambda(x) (combine-elt-lst-aux x lst2)) lst1)))))
+	
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; limpiar
+;;; funcion auxiliar para evitar parentesis "extra"
+;;;
+;;; INPUT lst:lista quu queremos "limpiar"
+;;; OUTPUT: lista de la manera pedida en el ejercicio 3.3
+;;;
+(defun limpiar (lst)
+	(if (null (cdr lst)) 
+		(car lst)
+		(append (car lst) (limpiar (cdr lst)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; combine-list-of-lsts
@@ -277,7 +310,7 @@
 ;;;
 ;;; OUTPUT: lista con todas las posibles combinaciones de elementos
 (defun combine-list-of-lsts (lstolsts)
-	(if (null (cdr lstolsts)) (mapcar #'list (car lstolsts))
+	(if (null lstolsts) '(())
 	(combine-list-of-lsts-aux (car lstolsts) (combine-list-of-lsts (cdr lstolsts)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
