@@ -381,7 +381,6 @@
 ;;; expand-cond
 ;;; Recibe una expresion con condicional y la transforma en una con
 ;;; and's y or's
-;;; determinar si es SAT o UNSAT
 ;;;
 ;;; INPUT  : fbf - Formula bien formada (FBF) a analizar.
 ;;; OUTPUT : fbf - Formula bien formada (FBF) sin condicional
@@ -390,23 +389,75 @@
   (list +or+ (list +not+ (second fbf)) (third fbf)))
   
   
+ ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; expand
+;;; Recibe una expresion con condicional o bicondicional
+;;; y la transforma en una con and's y or's
+;;;
+;;; INPUT  : fbf - Formula bien formada (FBF) con condicionales
+;;; OUTPUT : fbf - Formula bien formada (FBF) sin condicionales
+;;;
 
-(defun expand(lst fbf)
+(defun expand(fbf)
 	(if (equal T (bicond-connector-p (first fbf)))
-			(expand-truth-tree-aux lst (list +and+ (expand-bicond fbf))))
-	(expand-truth-tree-aux lst (list +and+ (expand-cond fbf))))
+			(list +and+ (expand-bicond fbf))
+	(list +and+ (expand-cond fbf))))
 
+;;;
+;;; create-childs
+;;; va haciendo llamadas recursivas a expand-truth-tree-aux
+;;; segun si es un and o un or
+;;; 
+;;; INPUT: lst lista literales hasta ahira
+;;;			fbf - formula bien formada
+;;; OUTPUT: lista no contradictoria de literales
+;;;
 (defun create-childs (lst fbf)
 	(if (equal +or+ (first fbf))
 		(or (expand-truth-tree-aux lst (second fbf)) (expand-truth-tree-aux lst (third fbf)))
-	(expand-truth-tree-aux lst (second fbf))))
+	(append (expand-truth-tree-aux lst (second fbf)) (expand-truth-tree-aux lst (third fbf))  lst)))
   
 (defun expand-truth-tree-aux (lst fbf)
-	(if (not (literal-p fbf)) 
-		(if (equal T (binary-connector-p (first fbf)))
-			(expand-truth-tree-aux lst (expand lst fbf))
-		(create-childs lst fbf))
-	(cons fbf lst)))
+
+	(if (and (not (literal-p fbf)) (not (null fbf)))
+		(cond ((binary-connector-p (first fbf)) (expand-truth-tree-aux lst (expand fbf)))
+			( (n-ary-connector-p (first fbf))(create-childs lst fbf))
+			(T (append fbf lst)))
+		(if (literal-p fbf) (cons fbf lst)
+			lst)))
+
+			
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; eliminar-not
+;;; Reduce la expresion a un literal o a un literal negado
+;;;
+;;; INPUT  : x - expresion de un literal negado multiples veces
+;;; OUTPUT : x - literal negado o literal positivo
+;;;
+(defun eliminar-not (x)
+	(if (or (null x) (literal-p x)) x
+	;; si no eliminamos...
+	(let ((connector (first x)))
+	;; Comprobamos si es una negacion
+	(if (unary-connector-p connector)
+		(let ((aux (second x)))
+		(if (unary-connector-p (first aux)) (eliminar-not (second aux))
+	x))))))
+	
+(defun valor-verdad (lst)
+	(if	(or (null (first lst)) (null lst)) nil
+	(valor-verdad (cdr lst))))
+	
+(defun evaluar (lst)
+	(if (or (null lst) (literal-p lst)) lst
+		(mapcar #'(lambda(x) (evaluar-aux (eliminar-not x) (cdr lst))) lst)))
+		
+(defun evaluar-aux (elt lst)
+	(if (or (null lst) (literal-p lst) )
+		(not (equal elt (eliminar-not (list +not+ lst))))
+	(and (evaluar-aux elt (first lst)) (evaluar-aux elt (cdr lst)))))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; truth-tree
 ;;; Recibe una expresion y construye su arbol de verdad para
@@ -417,6 +468,7 @@
 ;;;          N   - FBF es UNSAT
 ;;;
 (defun truth-tree (fbf)
+	
   )
 
 
