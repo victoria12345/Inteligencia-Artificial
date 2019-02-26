@@ -414,19 +414,31 @@
 ;;;
 (defun create-childs (lst fbf)
 	(if (equal +or+ (first fbf))
-		(or (expand-truth-tree-aux lst (second fbf)) (expand-truth-tree-aux lst (third fbf)))
-	(append (expand-truth-tree-aux lst (second fbf)) (expand-truth-tree-aux lst (third fbf))  lst)))
+		(mapcar #'(lambda(x) (expand-truth-tree-aux lst x)) (cdr fbf))
+	
+	(and_tree (expand-truth-tree-aux lst (cdr fbf)) lst)))
+	
+
+	; (if (null lst)
+	; (cons (expand-truth-tree-aux lst (cdr fbf)) lst)
+	
+	;(mapcar #'(lambda(x)(append (expand-truth-tree-aux lst (cdr fbf)) x)) lst)
+	
+(defun and_tree (result lst)
+	(if (null lst) result
+	(mapcar #'(lambda(x)(append result (LIST x))) lst)))
   
 (defun expand-truth-tree-aux (lst fbf)
+	(when (not (null fbf))
 
 	(if (and (not (literal-p fbf)) (not (null fbf)))
-		(cond ((binary-connector-p (first fbf)) (expand-truth-tree-aux lst (expand fbf)))
+		(cond ((unary-connector-p (first fbf)) (expand-truth-tree-aux lst (eliminar-not fbf)))
+			( (binary-connector-p (first fbf)) (expand-truth-tree-aux lst (expand fbf)))
 			( (n-ary-connector-p (first fbf))(create-childs lst fbf))
-			(T (append fbf lst)))
-		(if (literal-p fbf) (cons fbf lst)
-			lst)))
-
-			
+			( (literal-p (first fbf)) (and_tree (list (first fbf)) (expand-truth-tree-aux lst (cdr fbf))))
+			(T (append (expand-truth-tree-aux lst (first fbf)) (expand-truth-tree-aux lst (cdr fbf)) lst)))
+		(if (and (null lst)(literal-p fbf)) (and_tree (list fbf) lst)
+			lst))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; eliminar-not
@@ -442,21 +454,49 @@
 	;; Comprobamos si es una negacion
 	(if (unary-connector-p connector)
 		(let ((aux (second x)))
+		;;si es un not volvemos a reducir
 		(if (unary-connector-p (first aux)) (eliminar-not (second aux))
-	x))))))
+		;; si no modificamos la operacion
+			(eliminar-not (cons (intercambio (first aux)) 
+						(mapcar #'(lambda(x) (list +not+ x)) (cdr aux)))))
+		)
+	(cons connector (mapcar #'eliminar-not (cdr x)))))))
 	
-(defun valor-verdad (lst)
-	(if	(or (null (first lst)) (null lst)) nil
-	(valor-verdad (cdr lst))))
+(defun eliminar-parentesis (atomos fbf)
+	(cond
+		((null fbf) nil)
+		((equal T (literal-p fbf)) (cons fbf atomos))
+		((equal T (literal-p (first fbf))) (append (list (first fbf)) (eliminar-parentesis atomos (cdr fbf))))
+		(T (append (first fbf) (eliminar-parentesis atomos (cdr fbf))))))
+
+
+	(if (or (null fbf) ) (cons (first fbf) atomos)
+	(append (first fbf) (eliminar-parentesis atomos (cdr fbf)))))
+	
+(defun intercambio (connector)
+	(cond	
+		((equal +or+ connector) +and+)
+		((equal +and+ connector) +or+)
+		(t connector)))
+	
+(defun valor-verdad (x)
+	(cond	((null x) T)
+			((equal NIL (first x)) nil)
+			((valor-verdad (cdr x)))))
 	
 (defun evaluar (lst)
 	(if (or (null lst) (literal-p lst)) lst
 		(mapcar #'(lambda(x) (evaluar-aux (eliminar-not x) (cdr lst))) lst)))
 		
 (defun evaluar-aux (elt lst)
-	(if (or (null lst) (literal-p lst) )
+	(if (or (null lst) (literal-p lst))
 		(not (equal elt (eliminar-not (list +not+ lst))))
 	(and (evaluar-aux elt (first lst)) (evaluar-aux elt (cdr lst)))))
+	
+(defun SAT (ramas)
+	(cond ((null ramas) nil)
+		  ((equal T (first ramas)) T)
+		  (T (SAT (cdr ramas)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; truth-tree
@@ -468,8 +508,8 @@
 ;;;          N   - FBF es UNSAT
 ;;;
 (defun truth-tree (fbf)
-	
-  )
+	(if (null fbf) NIL
+	(SAT (mapcar #'(lambda(x) (valor-verdad (evaluar (eliminar-parentesis NIL x))))(expand-truth-tree-aux NIL fbf)))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
