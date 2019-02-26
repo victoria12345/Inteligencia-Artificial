@@ -449,14 +449,14 @@
 ;;;
 (defun eliminar-not (x)
 	(if (or (null x) (literal-p x)) x
-	;; si no eliminamos...
+	;;si no eliminamos...
 	(let ((connector (first x)))
-	;; Comprobamos si es una negacion
+	;;Comprobamos si es una negacion
 	(if (unary-connector-p connector)
 		(let ((aux (second x)))
 		;;si es un not volvemos a reducir
 		(if (unary-connector-p (first aux)) (eliminar-not (second aux))
-		;; si no modificamos la operacion
+		;;si no modificamos la operacion
 			(eliminar-not (cons (intercambio (first aux)) 
 						(mapcar #'(lambda(x) (list +not+ x)) (cdr aux)))))
 		)
@@ -468,10 +468,6 @@
 		((equal T (literal-p fbf)) (cons fbf atomos))
 		((equal T (literal-p (first fbf))) (append (list (first fbf)) (eliminar-parentesis atomos (cdr fbf))))
 		(T (append (first fbf) (eliminar-parentesis atomos (cdr fbf))))))
-
-
-	(if (or (null fbf) ) (cons (first fbf) atomos)
-	(append (first fbf) (eliminar-parentesis atomos (cdr fbf)))))
 	
 (defun intercambio (connector)
 	(cond	
