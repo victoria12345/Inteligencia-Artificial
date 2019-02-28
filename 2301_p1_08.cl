@@ -245,6 +245,18 @@
 (defun combine-elt-lst (elt lst)
 	(if (null lst) '()
 	(mapcar #'(lambda(x) (list elt x)) lst)))
+	
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; limpiar
+;;; funcion auxiliar para evitar parentesis "extra"
+;;;
+;;; INPUT lst:lista quu queremos "limpiar"
+;;; OUTPUT: lista de la manera pedida en el ejercicio 3.3
+;;;
+(defun limpiar (lst)
+	(if (null (cdr lst)) 
+		(car lst)
+		(append (car lst) (limpiar (cdr lst)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; combine-lst-lst
@@ -255,7 +267,7 @@
 ;;;
 ;;; OUTPUT: producto cartesiano de las dos listas
 (defun combine-lst-lst (lst1 lst2)
-	(mapcan #'(lambda(x) (combine-elt-lst x lst2)) lst1 ))
+	(limpiar (mapcar #'(lambda(x) (combine-elt-lst x lst2)) lst1 )))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; combine-elt-lst-aux
@@ -288,17 +300,7 @@
 	((null lst2) lst1)
 	(T (limpiar (mapcar #'(lambda(x) (combine-elt-lst-aux x lst2)) lst1)))))
 	
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; limpiar
-;;; funcion auxiliar para evitar parentesis "extra"
-;;;
-;;; INPUT lst:lista quu queremos "limpiar"
-;;; OUTPUT: lista de la manera pedida en el ejercicio 3.3
-;;;
-(defun limpiar (lst)
-	(if (null (cdr lst)) 
-		(car lst)
-		(append (car lst) (limpiar (cdr lst)))))
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; combine-list-of-lsts
@@ -369,7 +371,6 @@
 ;;; expand-bicond
 ;;; Recibe una expresion con bicondicional y la transforma en una con
 ;;; and's y or's
-;;; determinar si es SAT o UNSAT
 ;;;
 ;;; INPUT  : fbf - Formula bien formada (FBF) a analizar.
 ;;; OUTPUT : fbf - Formula bien formada (FBF) sin bicondicional
@@ -419,15 +420,31 @@
 	(and_tree (expand-truth-tree-aux lst (cdr fbf)) lst)))
 	
 
-	; (if (null lst)
-	; (cons (expand-truth-tree-aux lst (cdr fbf)) lst)
-	
-	;(mapcar #'(lambda(x)(append (expand-truth-tree-aux lst (cdr fbf)) x)) lst)
-	
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; and_tree
+;;; Organiza la lista para cuando haya un and
+;;;
+;;; INPUT  : result : resultado de la funcion expand-truth-tree-aux (de los 
+;;; 					operadores del and)
+;;; 		 lst: lista de atomos
+;;; OUTPUT : lista que debe ser evaluable su valor de verdad
+;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun and_tree (result lst)
 	(if (null lst) result
 	(mapcar #'(lambda(x)(append result (LIST x))) lst)))
-  
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; expand-truth-tree-aux
+;;; Se encarga de ir ramificando la fbf de manera adecuada para finalmente
+;;; poder comprobar si es verdad (en una funcion exterior)
+;;;
+;;; INPUT  : lst: lista de atomos
+;;;			 fbf: formula bine formada
+;;; OUTPUT : lista de listas de atomos.
+;;;			 se puede ver como un arbol, en el que cada rama es una lista
+;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 
 (defun expand-truth-tree-aux (lst fbf)
 	(when (not (null fbf))
 
@@ -436,7 +453,7 @@
 			( (binary-connector-p (first fbf)) (expand-truth-tree-aux lst (expand fbf)))
 			( (n-ary-connector-p (first fbf))(create-childs lst fbf))
 			( (literal-p (first fbf)) (and_tree (list (first fbf)) (expand-truth-tree-aux lst (cdr fbf))))
-			(T (append (expand-truth-tree-aux lst (first fbf)) (expand-truth-tree-aux lst (cdr fbf)) lst)))
+			(T (and_tree (expand-truth-tree-aux lst (first fbf)) (expand-truth-tree-aux lst (cdr fbf)))))
 		(if (and (null lst)(literal-p fbf)) (and_tree (list fbf) lst)
 			lst))))
 
@@ -461,7 +478,18 @@
 						(mapcar #'(lambda(x) (list +not+ x)) (cdr aux)))))
 		)
 	(cons connector (mapcar #'eliminar-not (cdr x)))))))
-	
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; eliminar-parentesis
+;;; Elimina los parentesis necesarios de una lista para solo obtener atomos
+;;;
+;;; INPUT  : atomos : lista de atomos
+;;;			 fbf: lista de atomos resultante de expand-truth-tree-aux
+;;; 		 lst: lista de atomos
+;;; OUTPUT : lista de atomos que ya puede ser evaluable por las funciones creadas
+;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun eliminar-parentesis (atomos fbf)
 	(cond
 		((null fbf) nil)
@@ -469,26 +497,75 @@
 		((equal T (literal-p (first fbf))) (append (list (first fbf)) (eliminar-parentesis atomos (cdr fbf))))
 		(T (append (first fbf) (eliminar-parentesis atomos (cdr fbf))))))
 	
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; intercambio
+;;; Intercambia un and por un or
+;;;
+;;; INPUT  : connector: conector que debe ser intercambiado
+;;; 		 lst: lista de atomos
+;;; OUTPUT : un or (cuando conector = and) o un and (conector = or)
+;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun intercambio (connector)
 	(cond	
 		((equal +or+ connector) +and+)
 		((equal +and+ connector) +or+)
 		(t connector)))
-	
+
+		
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; valor-verdad
+;;; Devuelve T o NIL segun el valor-verdad de esa lista
+;;;
+;;; INPUT  : x: lista de valores de verdad (T o F)
+;;; OUTPUT : T si son todos T, NIL, si no
+;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun valor-verdad (x)
 	(cond	((null x) T)
 			((equal NIL (first x)) nil)
 			((valor-verdad (cdr x)))))
-	
+
+			
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; evaluar
+;;; Evalua si hay contradicciones en una lista de atomos
+;;;
+;;; INPUT  : lst: lista de atomos
+;;; 		 
+;;; OUTPUT : lista con tantos NIL como atomos con contradiccion haya
+;;;			   si un atomo no tiene contradccion le corresponde un T
+;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun evaluar (lst)
 	(if (or (null lst) (literal-p lst)) lst
 		(mapcar #'(lambda(x) (evaluar-aux (eliminar-not x) (cdr lst))) lst)))
 		
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; evaluar-aux
+;;; Mira las contradicciones de un literal con otra lista de literales
+;;;
+;;; INPUT  : elt: listeral que miramos si tiene contradicciones
+;;; 		 lst: lista de atomos
+;;; OUTPUT : T si no hay contradiccion, NIL, si la hay
+;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun evaluar-aux (elt lst)
 	(if (or (null lst) (literal-p lst))
 		(not (equal elt (eliminar-not (list +not+ lst))))
 	(and (evaluar-aux elt (first lst)) (evaluar-aux elt (cdr lst)))))
 	
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; SAT
+;;; Mira si un arbol es SAT
+;;;
+;;; INPUT  : ramas: lista de listas de atomos
+;;; OUTPUT : T si alguna de las ramas no tiene contradicciones, Nil si no
+;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun SAT (ramas)
 	(cond ((null ramas) nil)
 		  ((equal T (first ramas)) T)
