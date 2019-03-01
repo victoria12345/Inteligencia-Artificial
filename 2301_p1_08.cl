@@ -376,7 +376,7 @@
 ;;; OUTPUT : fbf - Formula bien formada (FBF) sin bicondicional
 ;;;
 (defun expand-bicond (fbf)
- (list +or+ (list +and+ (second fbf) (third fbf)) (list +and+ (list +not+ (second fbf) +not+ (third fbf)))))
+ (list +or+ (list +and+ (second fbf) (third fbf)) (list +and+ (list +not+ (second fbf))(list +not+ (third fbf))))))
 
  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; expand-cond
