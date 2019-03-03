@@ -95,12 +95,12 @@
 ;;; Devuelve una copia de una lista
 ;;; INPUT:  lst: lista que queremos copiar
 ;;; OUTPUT: Una lista que es una copia de lst
-;;;				
+;;;
 (defun copia-lista (lst)
   	(if (atom lst)
 		lst
 		(cons (car lst) (copia-lista (cdr lst)))))
-				
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; order-vectors-cosine-distance
 ;;; Devuelve aquellos vectores similares a una categoria
@@ -211,7 +211,7 @@
 ;;;          si para esa semilla el metodo no converge
 ;;;
 (defun all-roots-newton (f df max-iter semillas &optional ( tol 0.001))
-     (mapcar #'(lambda(x) (newton f df max-iter x tol)) semillas))
+  (mapcar #'(lambda(x) (newton f df max-iter x tol)) semillas))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; list-not-nil-roots-newton
@@ -226,9 +226,11 @@
 ;;;
 ;;; OUTPUT: Las raices no nil que se encuentran para las semillas
 ;;;
-(defun list-not-nil-roots-newton (f df max-iter semillas &optional (tol 0.001))
- (mapcan #'nconc (all-roots-newton f df max-iter semillas tol)))
+(defun list-not-nil-roots-newton (f df max-iter semillas &optional ( tol 0.001))
+  (mapcan #'(lambda(x) (unless (null x) (list x))) (all-roots-newton f df max-iter semillas tol)))
 
+(list-not-nil-roots-newton #'(lambda(x) (* (- x 4) (- x 1) (+ x 3)))
+  #'(lambda (x) (- (* x (- (* x 3) 4)) 11)) 20 '(0.6 3.0 10000.0))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; EJERCICIO 3
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -245,7 +247,7 @@
 (defun combine-elt-lst (elt lst)
 	(if (null lst) '()
 	(mapcar #'(lambda(x) (list elt x)) lst)))
-	
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; limpiar
 ;;; funcion auxiliar para evitar parentesis "extra"
@@ -254,7 +256,7 @@
 ;;; OUTPUT: lista de la manera pedida en el ejercicio 3.3
 ;;;
 (defun limpiar (lst)
-	(if (null (cdr lst)) 
+	(if (null (cdr lst))
 		(car lst)
 		(append (car lst) (limpiar (cdr lst)))))
 
@@ -299,7 +301,7 @@
 	(cond ((null lst1) lst2)
 	((null lst2) lst1)
 	(T (limpiar (mapcar #'(lambda(x) (combine-elt-lst-aux x lst2)) lst1)))))
-	
+
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -388,8 +390,8 @@
 ;;;
 (defun expand-cond (fbf)
   (list +or+ (list +not+ (second fbf)) (third fbf)))
-  
-  
+
+
  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; expand
 ;;; Recibe una expresion con condicional o bicondicional
@@ -408,7 +410,7 @@
 ;;; create-childs
 ;;; va haciendo llamadas recursivas a expand-truth-tree-aux
 ;;; segun si es un and o un or
-;;; 
+;;;
 ;;; INPUT: lst lista literales hasta ahira
 ;;;			fbf - formula bien formada
 ;;; OUTPUT: lista no contradictoria de literales
@@ -416,15 +418,15 @@
 (defun create-childs (lst fbf)
 	(if (equal +or+ (first fbf))
 		(mapcar #'(lambda(x) (expand-truth-tree-aux lst x)) (cdr fbf))
-	
+
 	(and_tree (expand-truth-tree-aux lst (cdr fbf)) lst)))
-	
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; and_tree
 ;;; Organiza la lista para cuando haya un and
 ;;;
-;;; INPUT  : result : resultado de la funcion expand-truth-tree-aux (de los 
+;;; INPUT  : result : resultado de la funcion expand-truth-tree-aux (de los
 ;;; 					operadores del and)
 ;;; 		 lst: lista de atomos
 ;;; OUTPUT : lista que debe ser evaluable su valor de verdad
@@ -444,7 +446,7 @@
 ;;; OUTPUT : lista de listas de atomos.
 ;;;			 se puede ver como un arbol, en el que cada rama es una lista
 ;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun expand-truth-tree-aux (lst fbf)
 	(when (not (null fbf))
 
@@ -474,7 +476,7 @@
 		;;si es un not volvemos a reducir
 		(if (unary-connector-p (first aux)) (eliminar-not (second aux))
 		;;si no modificamos la operacion
-			(eliminar-not (cons (intercambio (first aux)) 
+			(eliminar-not (cons (intercambio (first aux))
 						(mapcar #'(lambda(x) (list +not+ x)) (cdr aux)))))
 		)
 	(cons connector (mapcar #'eliminar-not (cdr x)))))))
@@ -496,7 +498,7 @@
 		((equal T (literal-p fbf)) (cons fbf atomos))
 		((equal T (literal-p (first fbf))) (append (list (first fbf)) (eliminar-parentesis atomos (cdr fbf))))
 		(T (append (first fbf) (eliminar-parentesis atomos (cdr fbf))))))
-	
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; intercambio
@@ -508,12 +510,12 @@
 ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun intercambio (connector)
-	(cond	
+	(cond
 		((equal +or+ connector) +and+)
 		((equal +and+ connector) +or+)
 		(t connector)))
 
-		
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; valor-verdad
 ;;; Devuelve T o NIL segun el valor-verdad de esa lista
@@ -527,13 +529,13 @@
 			((equal NIL (first x)) nil)
 			((valor-verdad (cdr x)))))
 
-			
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; evaluar
 ;;; Evalua si hay contradicciones en una lista de atomos
 ;;;
 ;;; INPUT  : lst: lista de atomos
-;;; 		 
+;;;
 ;;; OUTPUT : lista con tantos NIL como atomos con contradiccion haya
 ;;;			   si un atomo no tiene contradccion le corresponde un T
 ;;;
@@ -541,7 +543,7 @@
 (defun evaluar (lst)
 	(if (or (null lst) (literal-p lst)) lst
 		(mapcar #'(lambda(x) (evaluar-aux (eliminar-not x) (cdr lst))) lst)))
-		
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; evaluar-aux
@@ -556,7 +558,7 @@
 	(if (or (null lst) (literal-p lst))
 		(not (equal elt (eliminar-not (list +not+ lst))))
 	(and (evaluar-aux elt (first lst)) (evaluar-aux elt (cdr lst)))))
-	
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; SAT
@@ -587,7 +589,38 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; EJERCICIO 5
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Breadth-first-search in graphs
+;;;
+(defun bfs (end queue net)
+  (if (null queue) '()
+    ;Como queue es una lista de listas, escogemos path = Una lista con el nodo
+    ;inicial (1a iteracion) y escogemos node = primer nodo del path.
+    (let* ((path (first queue))
+        (node (first path)))
+      (if (eql node end)
+          ;Como escogemos como nodo actual el primer nodo de la cola, la
+          ;recursion hace que el path en este punto este invertido, de ahi
+          ;la funcion reverse.
+          (reverse path)
+        (bfs end
+            ;Pasamos como nueva cola la cola anterior+la generada por new-paths
+            (append (rest queue)
+                    (new-paths path node net))
+            net)))))
+
+(defun new-paths (path node net)
+  ;Para cada vecino de node añade el vecino al principio del path
+  (mapcar #'(lambda (n)
+              (cons n path))
+            ;Crea una lista con los vecinos de node
+            (rest (assoc node net))))
+
+(defun shortest-path (start end net)
+  (bfs end (list (list start)) net))
+;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; shortest-path-improved
@@ -600,7 +633,16 @@
 ;;;         nil si no lo encuentra
 
 (defun bfs-improved (end queue net)
-  )
+  (if (null queue) '()
+     (let* ((path (first queue))
+             (node (first path)))
+         (if (eql node end)
+               (reverse path)
+           (if (> (count node path) 1) '()
+             (bfs-improved end
+                          (append (rest queue)
+                                  (new-paths path node net))
+                          net))))))
 
-(defun shortest-path-improved (end queue net)
-  )
+(defun shortest-path-improved (start end net)
+  (bfs-improved end ( list ( list start )) net))
