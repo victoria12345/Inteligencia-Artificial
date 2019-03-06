@@ -229,8 +229,6 @@
 (defun list-not-nil-roots-newton (f df max-iter semillas &optional ( tol 0.001))
   (mapcan #'(lambda(x) (unless (null x) (list x))) (all-roots-newton f df max-iter semillas tol)))
 
-(list-not-nil-roots-newton #'(lambda(x) (* (- x 4) (- x 1) (+ x 3)))
-  #'(lambda (x) (- (* x (- (* x 3) 4)) 11)) 20 '(0.6 3.0 10000.0))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; EJERCICIO 3
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -587,12 +585,17 @@
 	(SAT (mapcar #'(lambda(x) (valor-verdad (evaluar (eliminar-parentesis NIL x))))(expand-truth-tree-aux NIL fbf)))))
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; EJERCICIO 5
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Breadth-first-search in graphs
+;;; Busqueda en anchura en un grafo
 ;;;
+;;;INPUT : end - nodo a buscar
+;;;        queue - cola de nodos a visitar
+;;;        net - grafo
+;;;OUTPUT : Camino mas corto desde el nodo que inicie la cola hasta end
 (defun bfs (end queue net)
   (if (null queue) '()
     ;Como queue es una lista de listas, escogemos path = Una lista con el nodo
@@ -608,8 +611,16 @@
             ;Pasamos como nueva cola la cola anterior+la generada por new-paths
             (append (rest queue)
                     (new-paths path node net))
-            net)))))
+             net)))))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; new-paths
+;;; devuelve una lista caminos con cada vecino descubierto y el camino anterior
+;;;
+;;;INPUT : path - camino vigente hasta el momento
+;;;        node - nodo cuyos vecinos vamos a descubrir
+;;;        net - grafo
+;;;OUTPUT : Camino mas corto desde el nodo que inicie la cola hasta end
 (defun new-paths (path node net)
   ;Para cada vecino de node añade el vecino al principio del path
   (mapcar #'(lambda (n)
@@ -623,12 +634,12 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; shortest-path-improved
+;;; bfs-improved
 ;;; Version de busqueda en anchura que no entra en recursion
 ;;; infinita cuando el grafo tiene ciclos
-;;; INPUT:   end: nodo final
-;;;          queue: cola de nodos por explorar
-;;;          net: grafo
+;;; INPUT:   end - nodo final
+;;;          queue - cola de nodos a visitar
+;;;          net - grafo
 ;;; OUTPUT: camino mas corto entre dos nodos
 ;;;         nil si no lo encuentra
 
@@ -642,7 +653,17 @@
              (bfs-improved end
                           (append (rest queue)
                                   (new-paths path node net))
-                          net))))))
+                           net))))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; shortest-path-improved
+;;; Version de busqueda en anchura que no entra en recursion
+;;; infinita cuando el grafo tiene ciclos
+;;; INPUT:   start: nodo inicial
+;;;          end: nodo final
+;;;          net: grafo
+;;; OUTPUT: camino mas corto entre dos nodos
+;;;         nil si no lo encuentra
 
 (defun shortest-path-improved (start end net)
   (bfs-improved end ( list ( list start )) net))
