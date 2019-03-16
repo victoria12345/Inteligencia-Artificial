@@ -329,7 +329,72 @@
 ;;         of the mandatory cities are missing from the path.
 ;;
 (defun f-goal-test (node destination mandatory) 
-  )
+	(if (or (not (node-p node)) (not (presente (node-state node) destination))) nil
+	;;si llega aqui es porque es un nodo destino 
+	(evaluar (camino-valido (get-camino node nil) mandatory))))
+	;;comprobamos si su camino pasa por los nodos obligatorios
+	
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Determina si un elemento esta presente en una lista
+;;
+;; Input:
+;; -x: elemento que "buscamos"
+;; -lst: lista de elementos
+;;
+;; Returns:
+;;		T si x esta presente en lst, nil si no es asi
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun presente (x lst)
+	(if (or (null x) (null lst)) nil
+	 (or (equal (first lst) x) (presente x (cdr lst)))))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Obtiene el camino de un nodo
+;;
+;; Input:
+;; -node: nodo cuyo camino buscamos
+;; -lst: lista de ciudades del camino hasta ese nodo
+;;
+;; Returns:
+;;		lst, lista del camino de ciudades anteriores hasta ese nodo
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;	 
+(defun get-camino (node lst)
+	(when (and (node-p node) (not (equal node-nevers node)))
+		(append (list (node-state node)) (get-camino (node-parent node) lst) lst)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Mira si las ciudades "obligatorias estan en el camino"
+;;
+;; Input:
+;; -camino: lista de ciudades que forman el camino
+;; -mandatory: lista de ciudades "obligatorias"
+;;
+;; Returns:
+;;		T si si pasa por todas las ciudades obligatorias, nil
+;; 		si no es asi
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun camino-valido(camino mandatory)
+	(evaluar (mapcar #'(lambda(x) (presente x camino)) mandatory)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Evalua una lista de valores de verdad
+;;
+;; Input:
+;; -lst: lista 
+;;
+;; Returns:
+;;		T si todos los elementos de la lista son T, nil si no es asi
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun evaluar (lst)
+	(cond
+		((equal lst T) lst)
+		((null (cdr lst)) (first lst))
+		(T (and (first lst) (evaluar (cdr lst))))))
 
 ;;
 ;; END: Exercise 3 -- Goal test
@@ -349,7 +414,7 @@
 ;; of the problem: two nodes are equivalent if they represent the same city 
 ;, and if the path they contain includes the same mandatory cities.
 ;;  Input:
-;;    node-1, node-1: the two nodes that we are comparing, each one
+;;    node-1, node-2: the two nodes that we are comparing, each one
 ;;                    defining a path through the parent links
 ;;    mandatory:  list with the names of the cities that is mandatory to visit
 ;;
@@ -358,7 +423,21 @@
 ;;    NIL: The nodes are not equivalent
 ;;
 (defun f-search-state-equal (node-1 node-2 &optional mandatory)
-  )
+	(cond 
+	((not (and (node-p node-1) (node-p node-2))) nil)
+	((and (equal (node-state node-1) (node-state node-2)) (null mandatory)) T)
+	(T (and (equivalentes (no-visitados (get-camino node-1 nil) mandatory nil) (no-visitados (get-camino node-2 nil) mandatory nil))
+			(equal (node-state node-1) (node-state node-2))))))
+
+(defun no-visitados (camino mandatory lst)
+	(when (not (null mandatory))
+	(if (not (presente (first mandatory) camino)) (append (list (first mandatory)) (no-visitados camino (cdr mandatory) lst) lst)
+		(append (no-visitados camino (cdr mandatory) lst) lst))))
+		
+(defun equivalentes (lst1 lst2)
+	(evaluar (and 
+	(mapcar #'(lambda(x) (presente x lst2)) lst1)
+	(mapcar #'(lambda(x) (presente x lst1)) lst2))))
 
 ;;
 ;; END: Exercise 4 -- Equal predicate for search states
