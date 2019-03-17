@@ -150,13 +150,38 @@
 ;;  estimate of teh travel time, the second which returns the estimate of 
 ;;  the cost of travel
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;; Devuelve la heuristica del tiempo
+;;
+;; Input: 
+;; -state: estado (=nombre de la ciudad) actual
+;; -sensors: lista cuyos elementos son de la siguiente forma : 
+;; 						(estado (h-time h-price))
+;;
+;; Returns:
+;;		Valor de la heuristica del tiempo
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun f-h-time (state sensors)
 	(cond
 	((or (null state)(null sensors)) NIL)
 	((equal state (first (first sensors))) (first (second (first sensors))))
 	( T (f-h-time state (cdr sensors)))))
 	
-
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;; Devuelve la heuristica del precio
+;;
+;; Input: 
+;; -state: estado (=nombre de la ciudad) actual
+;; -sensors: lista cuyos elementos son de la siguiente forma : 
+;; 						(estado (h-time h-price))
+;;
+;; Returns:
+;;		Valor de la heuristica del precio
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun f-h-price (state sensors)
   (cond
 	((or (null state)(null sensors)) NIL)
@@ -429,11 +454,37 @@
 	(T (and (equivalentes (no-visitados (get-camino node-1 nil) mandatory nil) (no-visitados (get-camino node-2 nil) mandatory nil))
 			(equal (node-state node-1) (node-state node-2))))))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;; Devuelve la lista de los nodos "obligatorios" no visitados
+;;
+;; Input:
+;; - camino: lista de las ciudades del camino
+;; -mandatory: lista de las ciudades obligatorias
+;; -lst : lista de las ciudades obligatorias no vistadas
+;;
+;; Returns:
+;; -lst: lista de las ciudades obligatorias no vistadas
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun no-visitados (camino mandatory lst)
 	(when (not (null mandatory))
 	(if (not (presente (first mandatory) camino)) (append (list (first mandatory)) (no-visitados camino (cdr mandatory) lst) lst)
 		(append (no-visitados camino (cdr mandatory) lst) lst))))
-		
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;; Devuelve si dos listas tienen los mismo elementos, sin importar 
+;; 	el orden
+;;
+;; Input:
+;; - lst1: primera lista
+;; -lst2: segunda lista
+;;
+;; Returns:
+;; 	  T si las listas tienen los mismos elementos, nil si no es asi
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;		
 (defun equivalentes (lst1 lst2)
 	(evaluar (and 
 	(mapcar #'(lambda(x) (presente x lst2)) lst1)
@@ -461,13 +512,23 @@
 
 (defparameter *travel-cheap* 
   (make-problem 
-   )
-  )
+	:states *cities*
+	:initial-state *origin*
+	:f-h #'(lambda(state) (f-h-price state *estimate*))
+	:f-goal-test #'(lambda(node) (f-goal-test node *destination* *mandatory*))
+	:f-search-state-equal #'(lambda (node-1 node-2) (f-search-state-equal node-1 node-2 *mandatory*))
+	:operators (list #'(lambda (node) (navigate-canal-price (node-state node) *canals*))
+					 #'(lambda (node) (navigate-train-price (node-state node) *trains* *forbidden*)))))
 
 (defparameter *travel-fast* 
   (make-problem 
-   )
-  )
+	:states *cities*
+	:initial-state *origin*
+	:f-h #'(lambda (state)(f-h-time state *estimate*))
+	:f-goal-test #'(lambda(node) (f-goal-test node *destination* *mandatory*))
+	:f-search-state-equal #'(lambda (node-1 node-2) (f-search-state-equal node-1 node-2 *mandatory*))
+	:operators (list #'(lambda (node) (navigate-canal-time (node-state node) *canals*))
+					 #'(lambda (node) (navigate-train-time (node-state node) *trains* *forbidden*)))))
 
 ;;
 ;;  END: Exercise 5 -- Define the problem structure
@@ -510,7 +571,33 @@
 ;;    given one
 ;;
 (defun expand-node (node problem)
-  )
+	(if (or (not (node-p node)) (not (problem-p problem))) nil
+	(let ((acciones (mapcar #'(lambda(x) (funcall x node)) (problem-operators problem))))
+		(eliminar-nil (mapcar #'(lambda(x) (expand-node-action node x problem)) (flatten acciones))))))
+		
+(defun flatten (lst)
+ (cond ((null lst) NIL)
+	((atom (first lst)) (cons (first lst) (flatten (rest lst))))
+	(t (append (flatten (first lst)) (flatten (rest lst))))))
+	
+(defun eliminar-nil (lst)
+	(when (not (null lst))
+		(if (null (first lst)) (eliminar-nil (cdr lst))
+		(cons (first lst) (eliminar-nil (cdr lst))))))
+  
+(defun expand-node-action (parent action problem)
+	(if (or (null action) (null parent) (null problem)) nil
+		(make-node 
+			:state (action-final action)
+			:parent parent
+			:action action
+			:depth (+ 1 (node-depth parent))
+			:g (+ (action-cost action) (node-g parent))
+			:h (funcall (problem-f-h problem) (action-final action))
+			:f (+ (funcall (problem-f-h problem) (action-final action)) (+ (action-cost action) (node-g parent))))))
+  
+(defun expand-node-operator (node cfun)
+	(mapcar #'(lambda(x)(action-final x)) (funcall cfun node)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
