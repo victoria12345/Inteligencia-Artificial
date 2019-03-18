@@ -648,8 +648,33 @@
 ;;   criterion node-compare-p.
 ;; 
 (defun insert-nodes (nodes lst-nodes node-compare-p)
-  )
-
+	(if (null nodes) lst-nodes		
+		(let ((lst-nodes-2 (insert-node (first nodes) lst-nodes node-compare-p)))
+		(insert-nodes (cdr nodes) lst-nodes-2 node-compare-p))))
+	
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;; Inserta un nodo en una lista ordenanda
+;;
+;; Input:
+;; -node: nodo que queremos insertar
+;; -lst-nodes: lista de nodos ordenados
+;; -node-compare-p: funcion para comparar dos nodos
+;;		(node-compare-p nodo-1 nodo-2) devuelve T si el primer nodo va antes
+;;
+;; Output:
+;; 		lst-nodes: lista de nodos ordenados con node incluido
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun insert-node (node lst-nodes node-compare-p)
+	(cond ((not (node-p node)) nil)
+		((null lst-nodes) (list node))
+		;; node va antes que el primero de lst-nodes
+		(T (if (funcall node-compare-p node (first lst-nodes)) (append (list node) lst-nodes)
+		;;node va despues que el primero
+			(append (list (first lst-nodes)) (insert-node node (cdr lst-nodes) node-compare-p))))))
+	
+	
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;; Inserts a list of nodes in an ordered list keeping the result list
@@ -675,7 +700,10 @@
 ;;   use it to call insert-nodes.
 ;;
 (defun insert-nodes-strategy (nodes lst-nodes strategy)
-  )
+	(cond ((not (strategy-p strategy)) nil)
+		((null nodes) lst-nodes)
+		((null lst-nodes) (insert-nodes-strategy (cdr nodes) (list (first nodes)) strategy))
+		(T (insert-nodes nodes lst-nodes (strategy-node-compare-p strategy)))))
 
 ;;
 ;;    END: Exercize 7 -- Node list management
