@@ -939,7 +939,18 @@
 											(cons primer-nodo closed-nodes) strategy (+ nVeces 1)))
 											
 				(T (graph-search-aux problem (cdr open-nodes)(cons primer-nodo closed-nodes) strategy (+ nVeces 1))))))))))
-			
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;; Devuelve un elemento de la lista que sea igual a nodo
+;;
+;; Input:
+;;  -nodo: nodo que buscamos que este en la lista (teniendo en cuenta el estado)
+;;	-lst: lista de nodos
+;;
+;; Output:
+;;		Un nodo igual si lo encuentra o nil, si no
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun devolver-nodo (nodo lst)
 	(cond
 		((null lst) nil)
@@ -971,9 +982,12 @@
 	(if (or (not(problem-p problem)) (not (strategy-p strategy))) nil
 		(graph-search-aux problem (list (make-node :state (problem-initial-state problem))) '() strategy 0)))
 
-;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;  A* search is simply a function that solves a problem using the A* strategy
-;
+;;
+;; Input: problem (problema a resolver con busqueda A*)
+;; Output: nodo solucion
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun a-star-search (problem)
 	(graph-search problem *A-star*))
 
@@ -990,10 +1004,32 @@
 ;;;
 ;*** solution-path ***
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;; Devuelve el camino hasta un nodo solucion
+;; 
+;; Input:
+;;	-node: nodo solucion del cual buscamos el camino
+;;
+;; Output: lista de estados hasta el nodo
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun solution-path (node)
 	(if (not (node-p node)) nil
 		(solution-path-aux (node-parent node) (list (node-state node)))))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;; Auxiliar de solution-path
+;;
+;; Input:
+;; -node: nodo del cual buscamos el camino
+;; -lst: lista d estados acumulados hasta ese nodo
+;;
+;; Output:
+;;		lst, lista de los estados del camino
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun solution-path-aux (node lst)
 	(if (null (node-parent node)) (cons (node-state node) lst)
 		(solution-path-aux (node-parent node) (cons (node-state node) lst))))
@@ -1001,10 +1037,31 @@
 ;*** action-sequence ***
 ; Visualize sequence of actions
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;; Devuelve el camino de acciones hasta un nodo solucion
+;; 
+;; Input:
+;;	-node: nodo solucion del cual buscamos el camino
+;;
+;; Output: lista de acciones hasta el nodo
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun action-sequence (node)
   (if (not (node-p node)) nil
 		(eliminar-nil (action-sequence-aux (node-parent node) (list (node-action node))))))
-		
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;; Auxiliar de action-sequence-aux
+;;
+;; Input:
+;; -node: nodo del cual buscamos el camino
+;; -lst: lista de acciones acumuladas hasta ese nodo
+;;
+;; Output:
+;;		lst, lista de las acciones del camino
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun action-sequence-aux (node lst)
 	(if (null (node-parent node)) (cons (node-action node) lst)
 		(action-sequence-aux (node-parent node) (cons (node-action node) lst))))
