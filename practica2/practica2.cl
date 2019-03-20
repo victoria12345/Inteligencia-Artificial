@@ -308,9 +308,36 @@
 ;; state and a list of canals, returns a list of actions to navigate
 ;; from the current city to the cities reachable from it by canal navigation.
 ;;
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;; Especializacion de navigate
+;; 
+;; Input:
+;; -state: estado inicial
+;; -canals: canales
+;;
+;; Output:
+;; 		Lista con las acciones disponibles a partir de state utilizando canals
+;;			y tomando como coste el tiempo
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun navigate-canal-time (state canals)
 	(navigate state canals #'get-time 'navigate-canal-time nil))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;; Especializacion de navigate
+;; 
+;; Input:
+;; -state: estado inicial
+;; -canals: canales
+;;
+;; Output:
+;; 		Lista con las acciones disponibles a partir de state utilizando canals
+;;			y tomando como coste el precio
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun navigate-canal-price (state canals)
 	(navigate state canals #'get-price 'navigate-canal-price nil))
 
@@ -324,9 +351,38 @@
 ;; 
 ;; Note that this function takes as a parameter a list of forbidden cities.
 ;;
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;; Especializacion de navigate
+;; 
+;; Input:
+;; -state: estado inicial
+;; -trains: vias de trenes 
+;; -forbidden: lista de estados prohibidos
+;;
+;; Output:
+;; 		Lista con las acciones disponibles a partir de state utilizando trains
+;;			y tomando como coste el tiempo
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun navigate-train-time (state trains forbidden)
   (navigate state trains #'get-time 'navigate-train-time forbidden))
-  
+ 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;; Especializacion de navigate
+;; 
+;; Input:
+;; -state: estado inicial
+;; -trains: vias de trenes 
+;; -forbidden: lista de estados prohibidos
+;;
+;; Output:
+;; 		Lista con las acciones disponibles a partir de state utilizando trains
+;;			y tomando como coste el precio
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun navigate-train-price (state trains forbidden)
   (navigate state trains #'get-price 'navigate-train-price forbidden))
 
@@ -569,22 +625,58 @@
 ;;  Returns:
 ;;    A list (node_1,...,node_n) of nodes that can be reached from the
 ;;    given one
-;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun expand-node (node problem)
 	(if (or (not (node-p node)) (not (problem-p problem))) nil
 	(let ((acciones (mapcar #'(lambda(x) (funcall x node)) (problem-operators problem))))
 		(eliminar-nil (mapcar #'(lambda(x) (expand-node-action node x problem)) (flatten acciones))))))
-		
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;; Elimina los parentesis "sobrantes" en una lista
+;; Para esta función hemos seguido el modelo que venia en los apuntes
+;; 
+;; Input:
+;; -lst: lista cuyos parentesis queremos eliminar-nil
+;;
+;; Output:
+;; 		lst sin parentesis sobrantes
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun flatten (lst)
  (cond ((null lst) NIL)
 	((atom (first lst)) (cons (first lst) (flatten (rest lst))))
 	(t (append (flatten (first lst)) (flatten (rest lst))))))
-	
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;; Elimina los elementos nil de una lista
+;;
+;; Input:
+;; 	-lst: lista que queremos sin elementos nil
+;;
+;; Output:
+;; 		lst sin elementos nil
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun eliminar-nil (lst)
 	(when (not (null lst))
 		(if (null (first lst)) (eliminar-nil (cdr lst))
 		(cons (first lst) (eliminar-nil (cdr lst))))))
-  
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;; Devueve un nodo segun la accion que se haga al padre (parent)
+;;
+;; Input:
+;; -parent: nodo padre en el que aplicamos la accion
+;; -action: accion que realizamos
+;; -problem: es una estructura problema que tiene la lista de operadores
+;;
+;; Output:
+;;		Nodo(estructura) hijo obtenido al realizar la accion al padre
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 
 (defun expand-node-action (parent action problem)
 	(if (or (null action) (null parent) (null problem)) nil
 		(make-node 
@@ -595,7 +687,20 @@
 			:g (+ (action-cost action) (node-g parent))
 			:h (funcall (problem-f-h problem) (action-final action))
 			:f (+ (funcall (problem-f-h problem) (action-final action)) (+ (action-cost action) (node-g parent))))))
-  
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;; Devuelve los estados a los que podemos llegar usando un operador
+;; en un nodo
+;;
+;; Input:
+;; -node: Nodo del estado actual
+;; -cfun: funcion que sera el operador para obtener nuevos nodos
+;;
+;; Output:
+;;		lista de los estados finales tras aplicar cfun en ese nodo
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 
 (defun expand-node-operator (node cfun)
 	(mapcar #'(lambda(x)(action-final x)) (funcall cfun node)))
 
@@ -720,8 +825,35 @@
 ;; us which nodes should be analyzed first. In the A* strategy, the first 
 ;; node to be analyzed is the one with the smallest value of g+h
 ;;
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; 
+;; funcion que compara dos nodos segun su valor en f
+;;
+;; Input:
+;; -node-1 primer nodo que se compara
+;; node-2 segundo nodo que se compara
+;;
+;; Output:
+;; 		T si la f del primero es menor que la del 2
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun node-f-<= (node-1 node-2)
+  (<= (node-f node-1)
+      (node-f node-2)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Estructura estrategia para A*
+;;
+;; De nombre le hemos puesto f-cost 
+;; Utilizamos para comparar la f pues esta es la estrategia que
+;; se utiliza en A*
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defparameter *A-star*
-  (make-strategy ))
+  (make-strategy 
+	:name 'f-cost
+	:node-compare-p #'node-f-<=))
 
 ;;
 ;; END: Exercise 8 -- Definition of the A* strategy
@@ -783,8 +915,36 @@
 ;;     nested structure that contains not only the final node but the
 ;;     whole path from the starting node to the final.
 ;;
-(defun graph-search-aux (problem open-nodes closed-nodes strategy)
-  )
+(defun graph-search-aux (problem open-nodes closed-nodes strategy nVeces)
+			;El numero de veces que se realiza esta busqueda hemos decidido
+			; que como maximo sea 100
+	(if (> nVeces 100) nil
+		(if	
+		;Si lista de abiertos vacia no hay solucion
+		(null open-nodes) nil
+		(let ((primer-nodo (first open-nodes)))
+			;;Si el primer nodoo de abiertos es solucion:
+			(if (funcall (problem-f-goal-test problem) primer-nodo) primer-nodo
+			;;Si no lo es:
+			(let ((simil (devolver-nodo primer-nodo closed-nodes)))
+				(cond
+				((null simil) 
+					(graph-search-aux 
+											problem 
+											(insert-nodes-strategy (expand-node primer-nodo problem) (cdr open-nodes) *A-star*)
+											(cons primer-nodo closed-nodes)
+											strategy (+ nVeces 1)))
+				((< (node-g primer-nodo) (node-g simil)) (graph-search-aux problem 
+											(insert-nodes-strategy (expand-node primer-nodo problem) (cdr open-nodes) *A-star*)
+											(cons primer-nodo closed-nodes) strategy (+ nVeces 1)))
+											
+				(T (graph-search-aux problem (cdr open-nodes)(cons primer-nodo closed-nodes) strategy (+ nVeces 1))))))))))
+			
+(defun devolver-nodo (nodo lst)
+	(cond
+		((null lst) nil)
+		((equal (node-state nodo) (node-state (first lst))) (first lst))
+		(T (devolver-nodo nodo (cdr lst)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -808,13 +968,14 @@
 ;;    and an empty closed list.
 ;;
 (defun graph-search (problem strategy)
-  )
+	(if (or (not(problem-p problem)) (not (strategy-p strategy))) nil
+		(graph-search-aux problem (list (make-node :state (problem-initial-state problem))) '() strategy 0)))
 
 ;
 ;  A* search is simply a function that solves a problem using the A* strategy
 ;
 (defun a-star-search (problem)
-  )
+	(graph-search problem *A-star*))
 
 
 ;;
@@ -830,13 +991,23 @@
 ;*** solution-path ***
 
 (defun solution-path (node)
-  )
+	(if (not (node-p node)) nil
+		(solution-path-aux (node-parent node) (list (node-state node)))))
+
+(defun solution-path-aux (node lst)
+	(if (null (node-parent node)) (cons (node-state node) lst)
+		(solution-path-aux (node-parent node) (cons (node-state node) lst))))
 
 ;*** action-sequence ***
 ; Visualize sequence of actions
 
 (defun action-sequence (node)
-  )
+  (if (not (node-p node)) nil
+		(eliminar-nil (action-sequence-aux (node-parent node) (list (node-action node))))))
+		
+(defun action-sequence-aux (node lst)
+	(if (null (node-parent node)) (cons (node-action node) lst)
+		(action-sequence-aux (node-parent node) (cons (node-action node) lst))))
 
 ;;; 
 ;;;    END Exercise 10: Solution path / action sequence
