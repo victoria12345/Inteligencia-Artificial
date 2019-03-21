@@ -915,10 +915,7 @@
 ;;     nested structure that contains not only the final node but the
 ;;     whole path from the starting node to the final.
 ;;
-(defun graph-search-aux (problem open-nodes closed-nodes strategy nVeces)
-			;El numero de veces que se realiza esta busqueda hemos decidido
-			; que como maximo sea 100
-	(if (> nVeces 100) nil
+(defun graph-search-aux (problem open-nodes closed-nodes strategy)
 		(if	
 		;Si lista de abiertos vacia no hay solucion
 		(null open-nodes) nil
@@ -933,12 +930,12 @@
 											problem 
 											(insert-nodes-strategy (expand-node primer-nodo problem) (cdr open-nodes) *A-star*)
 											(cons primer-nodo closed-nodes)
-											strategy (+ nVeces 1)))
+											strategy ))
 				((< (node-g primer-nodo) (node-g simil)) (graph-search-aux problem 
 											(insert-nodes-strategy (expand-node primer-nodo problem) (cdr open-nodes) *A-star*)
-											(cons primer-nodo closed-nodes) strategy (+ nVeces 1)))
+											(cons primer-nodo closed-nodes) strategy ))
 											
-				(T (graph-search-aux problem (cdr open-nodes)(cons primer-nodo closed-nodes) strategy (+ nVeces 1))))))))))
+				(T (graph-search-aux problem (cdr open-nodes)(cons primer-nodo closed-nodes) strategy ))))))))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;; Devuelve un elemento de la lista que sea igual a nodo
@@ -980,7 +977,7 @@
 ;;
 (defun graph-search (problem strategy)
 	(if (or (not(problem-p problem)) (not (strategy-p strategy))) nil
-		(graph-search-aux problem (list (make-node :state (problem-initial-state problem))) '() strategy 0)))
+		(graph-search-aux problem (list (make-node :state (problem-initial-state problem))) '() strategy )))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;  A* search is simply a function that solves a problem using the A* strategy
