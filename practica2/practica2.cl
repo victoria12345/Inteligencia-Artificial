@@ -916,26 +916,29 @@
 ;;     whole path from the starting node to the final.
 ;;
 (defun graph-search-aux (problem open-nodes closed-nodes strategy)
-		(if
-		;Si lista de abiertos vacia no hay solucion
-		(null open-nodes) nil
+		(if (null open-nodes)
+      nil ; no hay solucion
 		(let ((primer-nodo (first open-nodes)))
-			;;Si el primer nodoo de abiertos es solucion:
-			(if (funcall (problem-f-goal-test problem) primer-nodo) primer-nodo
-			;;Si no lo es:
+			(if (funcall (problem-f-goal-test problem) primer-nodo)
+        primer-nodo ; evaluo a solucion
 			(let ((simil (devolver-nodo primer-nodo closed-nodes)))
-				(cond
-				((null simil)
+				(if (null simil)
 					(graph-search-aux
 											problem
-											(insert-nodes-strategy (expand-node primer-nodo problem) (cdr open-nodes) strategy)
-											(cons primer-nodo closed-nodes)
-											strategy ))
-				((< (node-g primer-nodo) (node-g simil)) (graph-search-aux problem
-											(insert-nodes-strategy (expand-node primer-nodo problem) (cdr open-nodes) strategy)
-											(cons primer-nodo closed-nodes) strategy ))
+											(insert-nodes-strategy
+                        (expand-node primer-nodo problem)
+                        (rest open-nodes)
+                        strategy)
+											(cons primer-nodo closed-nodes) strategy )
 
-				(T (graph-search-aux problem (cdr open-nodes)(cons primer-nodo closed-nodes) strategy ))))))))
+				(if (< (node-g primer-nodo) (node-g simil)) (graph-search-aux problem
+											(insert-nodes-strategy (expand-node primer-nodo problem)
+                      (rest open-nodes) strategy)
+											(cons primer-nodo closed-nodes) strategy )
+
+				(graph-search-aux problem (cdr open-nodes)
+                                  (cons primer-nodo closed-nodes)
+                                  strategy))))))))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;; Devuelve un elemento de la lista que sea igual a nodo
