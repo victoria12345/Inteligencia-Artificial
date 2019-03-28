@@ -15,13 +15,13 @@
   states               ; List of states
   initial-state        ; Initial state
   f-h                  ; reference to a function that evaluates to the
-                       ; value of the heuristic of a state
+  ; value of the heuristic of a state
   f-goal-test          ; reference to a function that determines whether
-                       ; a state fulfils the goal
+  ; a state fulfils the goal
   f-search-state-equal ; reference to a predictate that determines whether
-                       ; two nodes are equal, in terms of their search state
+  ; two nodes are equal, in terms of their search state
   operators)           ; list of operators (references to functions) to
-                       ; generate successors
+; generate successors
 ;;
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -164,10 +164,12 @@
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun f-h-time (state sensors)
-	(cond
-	((or (null state)(null sensors)) NIL)
-	((equal state (first (first sensors))) (first (second (first sensors))))
-	( T (f-h-time state (cdr sensors)))))
+  (cond
+   ((or (null state)(null sensors))
+    nil)
+   ((equal state (first (first sensors)))
+    (first (second (first sensors))))
+   ( T (f-h-time state (cdr sensors)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -184,9 +186,11 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun f-h-price (state sensors)
   (cond
-	((or (null state)(null sensors)) NIL)
-	((equal state (first (first sensors))) (second (second (first sensors))))
-	( T (f-h-price state (cdr sensors)))))
+   ((or (null state)(null sensors))
+    nil)
+   ((equal state (first (first sensors)))
+    (second (second (first sensors))))
+   ( T (f-h-price state (cdr sensors)))))
 ;;
 ;; END: Exercise 1 -- Evaluation of the heuristic
 ;;
@@ -219,7 +223,7 @@
 ;;    the destination in the states to which the current one is connected
 ;;
 (defun navigate (state lst-edges cfun  name &optional forbidden )
-	(navigate-aux state lst-edges cfun name forbidden nil))
+  (navigate-aux state lst-edges cfun name forbidden nil))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -240,14 +244,16 @@
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun navigate-aux (state lst-edges cfun name &optional forbidden lst)
-	(cond
-	((or (null state) (null lst-edges)) nil)
-	((and (equal state (first (first lst-edges))) (ciudad-permitida (second (first lst-edges)) forbidden))
+  (cond
+   ((or (null state) (null lst-edges))
+	nil)
+   ((and (equal state (first (first lst-edges)))
+	(ciudad-permitida (second (first lst-edges)) forbidden))
 		(append
-				(list (make-action :name name :origin state :final (second (first lst-edges)) :cost (apply cfun (list lst-edges))))
-				(navigate-aux state (cdr lst-edges) cfun name forbidden lst)
-				lst))
-	(T (append (navigate-aux state (cdr lst-edges) cfun name forbidden lst) lst))))
+		 (list (make-action :name name :origin state :final (second (first lst-edges)) :cost (apply cfun (list lst-edges))))
+		 (navigate-aux state (cdr lst-edges) cfun name forbidden lst)
+		 lst))
+   (T (append (navigate-aux state (cdr lst-edges) cfun name forbidden lst) lst))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -262,11 +268,11 @@
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun ciudad-permitida(state forbidden)
-	(cond
-	((null state) nil)
-	((null forbidden) T)
-	((equal state (first forbidden)) nil)
-	( T (ciudad-permitida state (cdr forbidden)))))
+  (cond
+   ((null state) nil)
+   ((null forbidden) T)
+   ((equal state (first forbidden)) nil)
+   ( T (ciudad-permitida state (cdr forbidden)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -281,8 +287,8 @@
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun get-time (lst)
-	(if (null lst) nil
-		(first (third (first lst)))))
+  (if (null lst) nil
+    (first (third (first lst)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -297,8 +303,8 @@
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun get-price (lst)
-	(if (null lst) nil
-		(second (third (first lst)))))
+  (if (null lst) nil
+    (second (third (first lst)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -323,7 +329,7 @@
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun navigate-canal-time (state canals)
-	(navigate state canals #'get-time 'navigate-canal-time nil))
+  (navigate state canals #'get-time 'navigate-canal-time nil))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -339,7 +345,7 @@
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun navigate-canal-price (state canals)
-	(navigate state canals #'get-price 'navigate-canal-price nil))
+  (navigate state canals #'get-price 'navigate-canal-price nil))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -410,10 +416,10 @@
 ;;         of the mandatory cities are missing from the path.
 ;;
 (defun f-goal-test (node destination mandatory)
-	(if (or (not (node-p node)) (not (presente (node-state node) destination))) nil
-	;;si llega aqui es porque es un nodo destino
-	(evaluar (camino-valido (get-camino node nil) mandatory))))
-	;;comprobamos si su camino pasa por los nodos obligatorios
+  (if (or (not (node-p node)) (not (presente (node-state node) destination)))
+	nil
+    ;;si llega aqui es porque es un nodo destino
+    (camino-valido (get-camino node nil) mandatory)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Determina si un elemento esta presente en una lista
@@ -427,8 +433,9 @@
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun presente (x lst)
-	(if (or (null x) (null lst)) nil
-	 (or (equal (first lst) x) (presente x (cdr lst)))))
+  (if (or (null x) (null lst))
+	nil
+   (or (equal (first lst) x) (presente x (cdr lst)))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -443,8 +450,9 @@
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun get-camino (node lst)
-	(when (and (node-p node) (not (equal node-nevers node)))
-		(append (list (node-state node)) (get-camino (node-parent node) lst) lst)))
+  (when (and (node-p node) (not (null (node-parent node))))
+    (append (list (node-state node))
+				  (get-camino (node-parent node) lst) lst)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Mira si las ciudades "obligatorias estan en el camino"
@@ -459,23 +467,10 @@
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun camino-valido(camino mandatory)
-	(evaluar (mapcar #'(lambda(x) (presente x camino)) mandatory)))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Evalua una lista de valores de verdad
-;;
-;; Input:
-;; -lst: lista
-;;
-;; Returns:
-;;		T si todos los elementos de la lista son T, nil si no es asi
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun evaluar (lst)
-	(cond
-		((equal lst T) lst)
-		((null (cdr lst)) (first lst))
-		(T (and (first lst) (evaluar (cdr lst))))))
+  (if (null mandatory)
+	T
+  (and (presente (first mandatory) camino)
+	   (camino-valido camino (cdr mandatory)))))
 
 ;;
 ;; END: Exercise 3 -- Goal test
@@ -504,11 +499,11 @@
 ;;    NIL: The nodes are not equivalent
 ;;
 (defun f-search-state-equal (node-1 node-2 &optional mandatory)
-	(cond
-	((not (and (node-p node-1) (node-p node-2))) nil)
-	((and (equal (node-state node-1) (node-state node-2)) (null mandatory)) T)
-	(T (and (equivalentes (no-visitados (get-camino node-1 nil) mandatory nil) (no-visitados (get-camino node-2 nil) mandatory nil))
-			(equal (node-state node-1) (node-state node-2))))))
+  (cond
+   ((not (and (node-p node-1) (node-p node-2))) nil)
+   ((and (equal (node-state node-1) (node-state node-2)) (null mandatory)) T)
+   (T (and (equivalentes (no-visitados (get-camino node-1 nil) mandatory nil) (no-visitados (get-camino node-2 nil) mandatory nil))
+           (equal (node-state node-1) (node-state node-2))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -524,9 +519,9 @@
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun no-visitados (camino mandatory lst)
-	(when (not (null mandatory))
-	(if (not (presente (first mandatory) camino)) (append (list (first mandatory)) (no-visitados camino (cdr mandatory) lst) lst)
-		(append (no-visitados camino (cdr mandatory) lst) lst))))
+  (when (not (null mandatory))
+    (if (not (presente (first mandatory) camino)) (append (list (first mandatory)) (no-visitados camino (cdr mandatory) lst) lst)
+      (append (no-visitados camino (cdr mandatory) lst) lst))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -542,10 +537,24 @@
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun equivalentes (lst1 lst2)
-	(evaluar (and
-	(mapcar #'(lambda(x) (presente x lst2)) lst1)
-	(mapcar #'(lambda(x) (presente x lst1)) lst2))))
+	(and (equivalentes-aux lst1 lst2) (equivalentes-aux lst2 lst1)))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;; Devuelve si una lista esta "contenida" en la otra
+;;
+;; Input:
+;; - lst1: primera lista
+;; -lst2: segunda lista
+;;
+;; Returns:
+;; 	  T si todos los elementos de lst1 estan en lst2
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun equivalentes-aux (lst1 lst2)
+	(if (null (cdr lst1))
+		(presente (first lst1) lst2)
+	(and (presente (first lst1) lst2) (equivalentes-aux (cdr lst1) lst2))))
 ;;
 ;; END: Exercise 4 -- Equal predicate for search states
 ;;
@@ -568,23 +577,23 @@
 
 (defparameter *travel-cheap*
   (make-problem
-	:states *cities*
-	:initial-state *origin*
-	:f-h #'(lambda(state) (f-h-price state *estimate*))
-	:f-goal-test #'(lambda(node) (f-goal-test node *destination* *mandatory*))
-	:f-search-state-equal #'(lambda (node-1 node-2) (f-search-state-equal node-1 node-2 *mandatory*))
-	:operators (list #'(lambda (node) (navigate-canal-price (node-state node) *canals*))
-					 #'(lambda (node) (navigate-train-price (node-state node) *trains* *forbidden*)))))
+   :states *cities*
+   :initial-state *origin*
+   :f-h #'(lambda(state) (f-h-price state *estimate*))
+   :f-goal-test #'(lambda(node) (f-goal-test node *destination* *mandatory*))
+   :f-search-state-equal #'(lambda (node-1 node-2) (f-search-state-equal node-1 node-2 *mandatory*))
+   :operators (list #'(lambda (node) (navigate-canal-price (node-state node) *canals*))
+                    #'(lambda (node) (navigate-train-price (node-state node) *trains* *forbidden*)))))
 
 (defparameter *travel-fast*
   (make-problem
-	:states *cities*
-	:initial-state *origin*
-	:f-h #'(lambda (state)(f-h-time state *estimate*))
-	:f-goal-test #'(lambda(node) (f-goal-test node *destination* *mandatory*))
-	:f-search-state-equal #'(lambda (node-1 node-2) (f-search-state-equal node-1 node-2 *mandatory*))
-	:operators (list #'(lambda (node) (navigate-canal-time (node-state node) *canals*))
-					 #'(lambda (node) (navigate-train-time (node-state node) *trains* *forbidden*)))))
+   :states *cities*
+   :initial-state *origin*
+   :f-h #'(lambda (state)(f-h-time state *estimate*))
+   :f-goal-test #'(lambda(node) (f-goal-test node *destination* *mandatory*))
+   :f-search-state-equal #'(lambda (node-1 node-2) (f-search-state-equal node-1 node-2 *mandatory*))
+   :operators (list #'(lambda (node) (navigate-canal-time (node-state node) *canals*))
+                    #'(lambda (node) (navigate-train-time (node-state node) *trains* *forbidden*)))))
 
 ;;
 ;;  END: Exercise 5 -- Define the problem structure
@@ -627,42 +636,35 @@
 ;;    given one
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun expand-node (node problem)
-	(if (or (not (node-p node)) (not (problem-p problem))) nil
-	(let ((acciones (mapcar #'(lambda(x) (funcall x node)) (problem-operators problem))))
-		(eliminar-nil (mapcar #'(lambda(x) (expand-node-action node x problem)) (flatten acciones))))))
+  (if (or (not (node-p node)) (not (problem-p problem)))
+      nil
+    (let ((acciones (mapcar #'(lambda(x) (funcall x node)) (problem-operators problem))))
+      (lista-nodos-def node problem acciones nil))))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
-;; Elimina los parentesis "sobrantes" en una lista
-;; Para esta función hemos seguido el modelo que venia en los apuntes
+;;  devuelve la lista de nodos resultantes de expandir un nodo aplicandole
+;;  distintas acciones
 ;;
-;; Input:
-;; -lst: lista cuyos parentesis queremos eliminar-nil
+;;  Input:
+;;    node:   nodo que expandimos
+;;	  problem: estructura problema que contiene la informacion necesaria
+;;	  lst-acciones: lista de acciones(o de listas de acciones) para expandir
+;;	  lst-nodes: lista de nodos resultantes de expandir node
 ;;
-;; Output:
-;; 		lst sin parentesis sobrantes
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun flatten (lst)
- (cond ((null lst) NIL)
-	((atom (first lst)) (cons (first lst) (flatten (rest lst))))
-	(t (append (flatten (first lst)) (flatten (rest lst))))))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;; Elimina los elementos nil de una lista
-;;
-;; Input:
-;; 	-lst: lista que queremos sin elementos nil
-;;
-;; Output:
-;; 		lst sin elementos nil
-;;
+;;  Returns:
+;;   lista de nodos que resultan de expandir node
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun eliminar-nil (lst)
-	(when (not (null lst))
-		(if (null (first lst)) (eliminar-nil (cdr lst))
-		(cons (first lst) (eliminar-nil (cdr lst))))))
+(defun lista-nodos-def (node problem lst-acciones lst-nodes)
+  (when (not (null lst-acciones))
+    (let
+        ((accion (first lst-acciones)))
+      (if (action-p accion)
+          (append (lista-nodos-def node problem (cdr lst-acciones) lst-nodes)
+				  (cons (expand-node-action node accion problem) lst-nodes))
+        ;sacamos todos los nodos de esa lista de acciones y los concatenamos a la final
+        (append (lista-nodos-def node problem accion nil)
+                (lista-nodos-def node problem (cdr lst-acciones) lst-nodes))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -678,15 +680,15 @@
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun expand-node-action (parent action problem)
-	(if (or (null action) (null parent) (null problem)) nil
-		(make-node
-			:state (action-final action)
-			:parent parent
-			:action action
-			:depth (+ 1 (node-depth parent))
-			:g (+ (action-cost action) (node-g parent))
-			:h (funcall (problem-f-h problem) (action-final action))
-			:f (+ (funcall (problem-f-h problem) (action-final action)) (+ (action-cost action) (node-g parent))))))
+  (when (not (or (null action) (null parent) (null problem)))
+    (make-node
+     :state (action-final action)
+     :parent parent
+     :action action
+     :depth (+ 1 (node-depth parent))
+     :g (+ (action-cost action) (node-g parent))
+     :h (funcall (problem-f-h problem) (action-final action))
+     :f (+ (funcall (problem-f-h problem) (action-final action)) (+ (action-cost action) (node-g parent))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -702,7 +704,7 @@
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun expand-node-operator (node cfun)
-	(mapcar #'(lambda(x)(action-final x)) (funcall cfun node)))
+  (mapcar #'(lambda(x)(action-final x)) (funcall cfun node)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;
@@ -753,9 +755,10 @@
 ;;   criterion node-compare-p.
 ;;
 (defun insert-nodes (nodes lst-nodes node-compare-p)
-	(if (null nodes) lst-nodes
-		(let ((lst-nodes-2 (insert-node (first nodes) lst-nodes node-compare-p)))
-		(insert-nodes (cdr nodes) lst-nodes-2 node-compare-p))))
+  (if (null nodes)
+	lst-nodes
+   (let ((lst-nodes-2 (insert-node (first nodes) lst-nodes node-compare-p)))
+    (insert-nodes (cdr nodes) lst-nodes-2 node-compare-p))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -772,12 +775,14 @@
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun insert-node (node lst-nodes node-compare-p)
-	(cond ((not (node-p node)) nil)
-		((null lst-nodes) (list node))
-		;; node va antes que el primero de lst-nodes
-		(T (if (funcall node-compare-p node (first lst-nodes)) (append (list node) lst-nodes)
-		;;node va despues que el primero
-			(append (list (first lst-nodes)) (insert-node node (cdr lst-nodes) node-compare-p))))))
+  (cond
+	((not (node-p node))
+		nil) ;caso de error
+     ((null lst-nodes)
+		(list node))
+	 (T (if (funcall node-compare-p node (first lst-nodes)) ; node va antes que el primero de lst-nodes
+			(append (list node) lst-nodes)
+		(append (list (first lst-nodes)) (insert-node node (cdr lst-nodes) node-compare-p))))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -805,10 +810,14 @@
 ;;   use it to call insert-nodes.
 ;;
 (defun insert-nodes-strategy (nodes lst-nodes strategy)
-	(cond ((not (strategy-p strategy)) nil)
-		((null nodes) lst-nodes)
-		((null lst-nodes) (insert-nodes-strategy (cdr nodes) (list (first nodes)) strategy))
-		(T (insert-nodes nodes lst-nodes (strategy-node-compare-p strategy)))))
+  (cond ((not (strategy-p strategy))
+			nil)
+        ((null nodes)
+			lst-nodes) ;lst-nodes ya estaba ordenada
+        ((null lst-nodes)
+			;se pasa el primero como una lista para que cuadren los argumentos
+			(insert-nodes-strategy (cdr nodes) (list (first nodes)) strategy))
+        (T (insert-nodes nodes lst-nodes (strategy-node-compare-p strategy)))))
 
 ;;
 ;;    END: Exercize 7 -- Node list management
@@ -852,8 +861,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defparameter *A-star*
   (make-strategy
-	:name 'f-cost
-	:node-compare-p #'node-f-<=))
+   :name 'f-cost
+   :node-compare-p #'node-f-<=))
 
 ;;
 ;; END: Exercise 8 -- Definition of the A* strategy
@@ -916,29 +925,26 @@
 ;;     whole path from the starting node to the final.
 ;;
 (defun graph-search-aux (problem open-nodes closed-nodes strategy)
-		(if
-		;Si lista de abiertos vacia no hay solucion
-		(null open-nodes) nil
-		(let ((primer-nodo (first open-nodes)))
-			;;Si el primer nodoo de abiertos es solucion:
-			(if (funcall (problem-f-goal-test problem) primer-nodo) primer-nodo
-			;;Si no lo es:
-			(let ((simil (devolver-nodo primer-nodo closed-nodes)))
-				(cond
-				((null simil)
-					(graph-search-aux
-											problem
-											(insert-nodes-strategy (expand-node primer-nodo problem) (cdr open-nodes) strategy)
-											(cons primer-nodo closed-nodes)
-											strategy ))
-				((< (node-g primer-nodo) (node-g simil)) (graph-search-aux problem
-											(insert-nodes-strategy (expand-node primer-nodo problem) (cdr open-nodes) strategy)
-											(cons primer-nodo closed-nodes) strategy ))
-
-				(T (graph-search-aux problem (cdr open-nodes)(cons primer-nodo closed-nodes) strategy ))))))))
+  (if (null open-nodes)
+      nil ; no hay solucion
+    (let ((primer-nodo (first open-nodes)))
+      (if (funcall (problem-f-goal-test problem) primer-nodo)
+          primer-nodo ; evaluo a solucion
+        (let ((simil (devolver-nodo primer-nodo closed-nodes)))
+          (if (or (null simil) (< (node-g primer-nodo) (node-g simil)))
+              (graph-search-aux
+               problem
+               (insert-nodes-strategy
+                (expand-node primer-nodo problem)
+                (cdr open-nodes)
+                strategy)
+               (cons primer-nodo closed-nodes) strategy )
+            (graph-search-aux problem (cdr open-nodes)
+									  (cons primer-nodo closed-nodes)
+									   strategy)))))))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
-;; Devuelve un elemento de la lista que sea igual a nodo
+;; Devuelve el primer elemento que encuentre de la lista que sea igual a nodo
 ;;
 ;; Input:
 ;;  -nodo: nodo que buscamos que este en la lista (teniendo en cuenta el estado)
@@ -949,10 +955,12 @@
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun devolver-nodo (nodo lst)
-	(cond
-		((null lst) nil)
-		((equal (node-state nodo) (node-state (first lst))) (first lst))
-		(T (devolver-nodo nodo (cdr lst)))))
+  (cond
+   ((null lst)
+	nil)
+   ((equal (node-state nodo)
+	(node-state (first lst))) (first lst))
+   (T (devolver-nodo nodo (cdr lst)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -976,8 +984,8 @@
 ;;    and an empty closed list.
 ;;
 (defun graph-search (problem strategy)
-	(if (or (not(problem-p problem)) (not (strategy-p strategy))) nil
-		(graph-search-aux problem (list (make-node :state (problem-initial-state problem))) '() strategy )))
+  (when (and (problem-p problem) (strategy-p strategy))
+    (graph-search-aux problem (list (make-node :state (problem-initial-state problem))) '() strategy )))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;  A* search is simply a function that solves a problem using the A* strategy
@@ -986,7 +994,7 @@
 ;; Output: nodo solucion
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun a-star-search (problem)
-	(graph-search problem *A-star*))
+  (graph-search problem *A-star*))
 
 
 ;;
@@ -1012,8 +1020,8 @@
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun solution-path (node)
-	(if (not (node-p node)) nil
-		(solution-path-aux (node-parent node) (list (node-state node)))))
+  (if (not (node-p node)) nil
+    (solution-path-aux (node-parent node) (list (node-state node)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -1028,8 +1036,8 @@
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun solution-path-aux (node lst)
-	(if (null (node-parent node)) (cons (node-state node) lst)
-		(solution-path-aux (node-parent node) (cons (node-state node) lst))))
+  (if (null (node-parent node)) (cons (node-state node) lst)
+    (solution-path-aux (node-parent node) (cons (node-state node) lst))))
 
 ;*** action-sequence ***
 ; Visualize sequence of actions
@@ -1046,7 +1054,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun action-sequence (node)
   (if (not (node-p node)) nil
-		(eliminar-nil (action-sequence-aux (node-parent node) (list (node-action node))))))
+    (action-sequence-aux (node-parent node) (list (node-action node)))))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;; Auxiliar de action-sequence-aux
@@ -1060,8 +1068,8 @@
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun action-sequence-aux (node lst)
-	(if (null (node-parent node)) (cons (node-action node) lst)
-		(action-sequence-aux (node-parent node) (cons (node-action node) lst))))
+  (if (null (node-parent node)) (cons (node-action node) lst)
+    (action-sequence-aux (node-parent node) (cons (node-action node) lst))))
 
 ;;;
 ;;;    END Exercise 10: Solution path / action sequence
@@ -1091,8 +1099,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defparameter *depth-first*
   (make-strategy
-    :name 'depth-first
-    :node-compare-p #'depth-first-node-compare-p))
+   :name 'depth-first
+   :node-compare-p #'depth-first-node-compare-p))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;; Funcion de comparacion de nodos para busqueda en anchura
@@ -1113,42 +1121,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defparameter *breadth-first*
   (make-strategy
-    :name 'breadth-first
-    :node-compare-p #'breadth-first-node-compare-p))
-
-;;;
-;;;    END Exercise 11: Other strategies
-;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;
-;;;    BEGIN Exercise 12: Heuristica de coste
-;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Definicion de nuevas estimaciones de coste para la heuristica creada
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defparameter *estimate-new*
-  '((Calais (0.0 0.0)) (Reims (25.0 7.5)) (Paris (30.0 12.5))
-    (Nancy (50.0 17.5)) (Orleans (55.0 31.5)) (St-Malo (65.0 47.5))
-    (Nantes (75.0 55.0)) (Brest (90.0 62.5)) (Nevers (70.0 22.5))
-    (Limoges (100.0 74.0)) (Roenne (85.0 25.0)) (Lyon (105.0 27.5))
-    (Toulouse (130.0 75.0)) (Avignon (135.0 47.5)) (Marseille (145.0 60.0))))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Definicion del problema de coste minimo con la nueva heuristica de coste
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defparameter *travel-cost-new*
-  (make-problem
-	:states *cities*
-	:initial-state *origin*
-	:f-h #'(lambda(state) (f-h-price state *estimate-new*))
-	:f-goal-test #'(lambda(node) (f-goal-test node *destination* *mandatory*))
-	:f-search-state-equal #'(lambda (node-1 node-2) (f-search-state-equal node-1 node-2 *mandatory*))
-	:operators (list #'(lambda (node) (navigate-canal-price (node-state node) *canals*))
-					 #'(lambda (node) (navigate-train-price (node-state node) *trains* *forbidden*)))))
+   :name 'breadth-first
+   :node-compare-p #'breadth-first-node-compare-p))
 
 ;;;
 ;;;    END Exercise 11: Other strategies
