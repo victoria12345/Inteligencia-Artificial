@@ -1,0 +1,11 @@
+concatena([],L,L).
+concatena([X|L1], L2, [X|L3]):-
+    concatena(L1,L2,L3).
+-----------------------------------
+
+duplica([],[]).
+duplica(L,L1) :-
+    [T|H] = L,
+    [P|C] = L1,
+    [A|B] = C,
+    member(T,L1), member(T, C), duplica(H,B).
