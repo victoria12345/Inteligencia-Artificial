@@ -1,0 +1,91 @@
+<div class="notebook">
+
+<div class="nb-cell markdown" name="md1">
+This notebook uses the student profile
+</div>
+
+<div class="nb-cell program" name="p2">
+concatena([],L,L).
+concatena([X|L1], L2, [X|L3]):-
+    concatena(L1,L2,L3).
+
+%Condicion de parada
+invierte([],[]).
+    
+%R es el resultado de concatenar el Resto de la lista
+% lo concatenamos con H de manera que el resultado es L
+invierte([H|T],L):-
+     invierte(T,R), concatena(R,[H],L). 
+
+%Condicion de parada
+duplica([],[]).
+
+%Comprobamos que el primer elemento sea el primero
+% y el segundo de L1 y comparamos el resto de L
+% con el resto, a partir del 3 de L1
+duplica(L,L1) :-
+  [T|H] = L,
+  [X|C] = L1,
+  [X|B] = C,
+    member(T,L1), member(T, C), duplica(H,B).
+
+%Condicion de parada
+palindromo([]).
+palindromo(L):-
+    invierte(L, X), iguales(L,X).
+
+%Funcion auxiliar
+%determina si dos listas son iguales
+iguales([],[]).
+iguales([T|H],[C|L]):-
+    member(T,[C]), iguales(H,L).
+
+
+
+</div>
+
+<div class="nb-cell query" name="q1">
+duplica([1, 2, 3], [1, 1, 2, 2, 3, 3]).
+</div>
+
+<div class="nb-cell query" name="q2">
+duplica([1, 2, 3], [1, 1, 2, 3, 3]).
+</div>
+
+<div class="nb-cell query" name="q3">
+duplica([1, 2, 3], L1).
+</div>
+
+<div class="nb-cell query" name="q4">
+duplica(L, [1, 2, 3]).
+</div>
+
+<div class="nb-cell query" data-tabled="true" name="q5">
+invierte([1, 2], L).
+</div>
+
+<div class="nb-cell query" data-tabled="true" name="q6">
+invierte([], L).
+</div>
+
+<div class="nb-cell query" data-tabled="true" name="q7">
+invierte(L, [1, 2]).
+</div>
+
+<div class="nb-cell query" data-tabled="true" name="q8">
+palindromo([]).
+</div>
+
+<div class="nb-cell query" data-tabled="true" name="q9">
+palindromo([1,2,3]).
+</div>
+
+<div class="nb-cell query" data-tabled="true" name="q10">
+palindromo([1,2,1]).
+</div>
+
+<div class="nb-cell query" data-tabled="true" name="q11">
+palindromo([1,2,1,1]).
+</div>
+
+</div>
