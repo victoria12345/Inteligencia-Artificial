@@ -4,7 +4,7 @@
 This notebook uses the student profile
 </div>
 
-<div class="nb-cell program" name="p2">
+<div class="nb-cell program" name="p1">
 concatena([],L,L).
 concatena([X|L1], L2, [X|L3]):-
     concatena(L1,L2,L3).
@@ -42,50 +42,21 @@ iguales([T|H],[C|L]):-
 
 
 
+divide(T,0,_,L2):-
+    iguales(T, L2).
+divide([H|T],N,[H2|T2],L2):-
+    N2 is N-1,
+    H == H2, divide(T,N2, T2, L2).
+
+
 </div>
 
-<div class="nb-cell query" name="q1">
-duplica([1, 2, 3], [1, 1, 2, 2, 3, 3]).
+<div class="nb-cell query" data-tabled="true" name="q1">
+divide([1, 2, 3, 4, 5], 3, L1, L2).
 </div>
 
-<div class="nb-cell query" name="q2">
-duplica([1, 2, 3], [1, 1, 2, 3, 3]).
-</div>
-
-<div class="nb-cell query" name="q3">
-duplica([1, 2, 3], L1).
-</div>
-
-<div class="nb-cell query" name="q4">
-duplica(L, [1, 2, 3]).
-</div>
-
-<div class="nb-cell query" data-tabled="true" name="q5">
-invierte([1, 2], L).
-</div>
-
-<div class="nb-cell query" data-tabled="true" name="q6">
-invierte([], L).
-</div>
-
-<div class="nb-cell query" data-tabled="true" name="q7">
-invierte(L, [1, 2]).
-</div>
-
-<div class="nb-cell query" data-tabled="true" name="q8">
-palindromo([]).
-</div>
-
-<div class="nb-cell query" data-tabled="true" name="q9">
-palindromo([1,2,3]).
-</div>
-
-<div class="nb-cell query" data-tabled="true" name="q10">
-palindromo([1,2,1]).
-</div>
-
-<div class="nb-cell query" data-tabled="true" name="q11">
-palindromo([1,2,1,1]).
+<div class="nb-cell query" data-tabled="true" name="q2">
+divide([1,2,3,4,5,6], 3, L, [4, 5, 6]).
 </div>
 
 </div>
