@@ -1,0 +1,27 @@
+<div class="notebook">
+
+<div class="nb-cell program" name="p1">
+%% EJERCICIO 5 %%
+concatena([],L,L).
+concatena([X|L1], L2, [X|L3]):-
+    concatena(L1,L2,L3).
+
+aplasta([], []).
+aplasta([H|T], L_aplastada) :-
+    aplasta(H, L1),
+    aplasta(T, L2),
+    concatena(L1, L2, L_aplastada).
+aplasta(L, [L]).
+
+
+</div>
+
+<div class="nb-cell query" name="q1">
+aplasta([1, [2, [3, 4], 5], [6, 7]], L).
+</div>
+
+<div class="nb-cell query" name="q2">
+aplasta(L, [1,2,3])
+</div>
+
+</div>
