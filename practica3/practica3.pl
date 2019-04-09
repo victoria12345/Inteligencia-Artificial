@@ -67,14 +67,14 @@ divide([H|T], N, [H|R],L2):-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	
 % Condicion de parada
+aplasta(L, [L]):-
+	\+ is_list(L).
 aplasta([], []).
 
 aplasta([H|T], L_aplastada) :-
     aplasta(H, L1),
     aplasta(T, L2),
     concatena(L1, L2, L_aplastada).
-	
-aplasta(L, [L]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 				EJERCICIO 7 			   %%
@@ -92,7 +92,43 @@ cod_primero(X, [X|R],Lrem, Lfront):-
 % esto lo hace cuando ya el primero no coincide con X|L2
 cod_primero(X,[P|R],[P|R],[X]).
 
-%Caso en el que la lista es vacia
+% Caso en el que la lista es vacia
 cod_primero(X,[],[],[X]).
 
+
 %% EJERCICIO 7.2 %%	
+
+% Condicion de parada
+cod_all([],[]).
+
+% Aplicamos al primer elemento cod_primero
+% A la segunda lista concatenamos el resultado de cod_primero
+% y volvemos a llamar a cod_primero con el primer elemento de Lrest
+% de cod_primero, que sera distinto a X.
+
+cod_all([X|T], [P|Lfront]):-
+    cod_primero(X,T, L1, P),
+    cod_all(L1, Lfront).
+	
+%% EJERCICIO 7.3 %%
+
+% Condicion de parada
+run_length_aux([],[]).
+
+% Recibe una lista de listas de el mismo elemento, X
+% Calcula su longitud, N
+% En la segunda lista concatena elementos de la forma
+% [X,N]
+run_length_aux([[H|T]|R], [[N,H]|L]):-
+    length([H|T],N),
+    run_length_aux(R,L).
+
+% Condicion de parada
+run_length([],[]).
+
+% aplica cod_all a la primera lista
+% Llama a su funcion auxiliar para obtener elementos
+% de la forma ["elemento", "num. de veces que aparece"]
+run_length(L1,L2):-
+   cod_all(L1,L),
+    run_length_aux(L,L2).
