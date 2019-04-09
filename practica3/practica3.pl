@@ -1,4 +1,9 @@
-    
+   
+%% Esta funcion nos la daban en la practica %%
+% La tercera lista es el resultado de concatenar
+% las dos primeras
+
+% Condicion de parada   
 concatena([],L,L).
 concatena([X|L1], L2, [X|L3]):-
     concatena(L1,L2,L3).
@@ -68,6 +73,8 @@ aplasta([H|T], L_aplastada) :-
     aplasta(H, L1),
     aplasta(T, L2),
     concatena(L1, L2, L_aplastada).
+	
+aplasta(L, [L]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 				EJERCICIO 7 			   %%
