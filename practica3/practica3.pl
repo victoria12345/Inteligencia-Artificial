@@ -178,16 +178,14 @@ build_tree([X-_], tree(X, nil, nil)).
 
 % Caso general, el primer nodo sera el hijo izquierdo del nodo raiz
 % y recursivamente va construyendo los demas hijos.
-build_tree([X-_|Rest], Tree) :- 
-	build_tree(Rest, S), Tree = tree(1, tree(X, nil, nil), S).
+build_tree([X-_|Rest], Tree) :- build_tree(Rest, S), Tree = tree(1, tree(X, nil, nil), S).
 
 
 %% EJERCICIO 8.1 %%
 
 % Si el nodo a codificar es el hijo izquierdo añadimos
 % un cero a la codificacion.
-encode_elem(X1, X2, tree(1, tree(X1, nil, nil), _)) :- 
-	concatena([0], [], X2).
+encode_elem(X1, X2, tree(1, tree(X1, nil, nil), _)) :- concatena([0], [], X2).
 
 % Si nos encontramos ante el hijo derecho del ultimo nivel
 % no hace falta añadir mas digitos.
@@ -195,8 +193,7 @@ encode_elem(X1, [], tree(X1, nil, nil)).
 
 % Caso general, nos movemos hacia la derecha y añadimos un 1
 % a la lista de codificacion.
-encode_elem(X1, X2, tree(1, _, R)) :- 
-	encode_elem(X1, List, R), concatena([1], List, X2).
+encode_elem(X1, X2, tree(1, _, R)) :- encode_elem(X1, List, R), concatena([1], List, X2).
 
 
 %% EJERCICIO 8.2 %%
@@ -207,13 +204,11 @@ encode_list([], [], _).
 
 % Si solo queda un elemento por codificar, lo hacemos y concatenamos
 % con la lista donde se guardara la codificacion.
-encode_list([X], L2, Tree) :- 
-	encode_elem(X, Laux, Tree), concatena([Laux], [], L2).
+encode_list([X], L2, Tree) :- encode_elem(X, Laux, Tree), concatena([Laux], [], L2).
 
 % Caso general.
 % Aplicamos encode_elem recursivamente y vamos concatenando la listas.
-encode_list([H|T], L2, Tree) :- 
-	encode_elem(H, Laux, Tree), encode_list(T, L, Tree), concatena([Laux], L, L2).
+encode_list([H|T], L2, Tree) :- encode_elem(H, Laux, Tree), encode_list(T, L, Tree), concatena([Laux], L, L2).
 
 
 %% EJERCICIO 8.3 %%
@@ -223,33 +218,27 @@ dictionary([a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z]).
 % Para la realizacion de encode necesitaremos varios predicados auxiliares.
 % contar_elemento cuenta el numero de veces que aparece un elemento en una lista.
 contar_elemento(_, [], 0).
-contar_elemento(X, [X|T], M) :- 
-	contar_elemento(X, T, N), M is N+1.
-contar_elemento(X, [Y|T], M) :- 
-	X \= Y, contar_elemento(X, T, M).
+contar_elemento(X, [X|T], M) :- contar_elemento(X, T, N), M is N+1.
+contar_elemento(X, [Y|T], M) :- X \= Y, contar_elemento(X, T, M).
 
 % contar_elementos cuenta el numero de veces que aparece en una lista
 % cada elemento de otra lista que le pasamos.
 contar_elementos([], _, _).
-contar_elementos([X], L, S) :- 
-	contar_elemento(X, L, C), concatena([X-C], [], S).
-contar_elementos([X|T], L, S) :- 
-	contar_elemento(X, L, C), concatena([X-C], D, S), contar_elementos(T, L, D), T \= [].
+contar_elementos([X], L, S) :- contar_elemento(X, L, C), concatena([X-C], [], S).
+contar_elementos([X|T], L, S) :- contar_elemento(X, L, C), concatena([X-C], D, S),
+                                  contar_elementos(T, L, D), T \= [].
 
 % Inserta en orden un elemento en una lista
 insert([X-P], [], [X-P]).
-insert([X-P], [Y-Q|Rest], [X-P, Y-Q|Rest]) :- 
-	P =< Q.
-insert([X-P], [Y-Q|Rest], [Y-Q|Z]) :- 
-	insert([X-P], Rest, Z), P > Q.
+insert([X-P], [Y-Q|Rest], [X-P, Y-Q|Rest]) :- P =< Q.
+insert([X-P], [Y-Q|Rest], [Y-Q|Z]) :- insert([X-P], Rest, Z), P > Q.
 
 % Ordena una lista utilizando la insercion previamente creada.
 sort_list([], []).
-sort_list([X-P|Rest], L) :-
-	sort_list(Rest, S), insert([X-P], S, L).
+sort_list([X-P|Rest], L) :- sort_list(Rest, S), insert([X-P], S, L).
 
 % Primero obtenemos el diccionario, despues contamos cuantas veces aparece cada
 % letra en la lista, la ordenamos e invertimos para que sea admitida por el
 % predicado build_tree, construimos el arbol y codificamos en funcion del arbol.
-encode(L1, L2) :-
-	dictionary(D), contar_elementos(D, L1, Laux), sort_list(Laux, LS), invierte(LS, LInv), build_tree(LInv, Tree), encode_list(L1, L2, Tree).
+encode(L1, L2) :- dictionary(D), contar_elementos(D, L1, Laux), sort_list(Laux, LS),
+                  invierte(LS, LInv), build_tree(LInv, Tree), encode_list(L1, L2, Tree).
