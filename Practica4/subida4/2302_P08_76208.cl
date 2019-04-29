@@ -1,9 +1,9 @@
-(defpackage :2302_P08_5add0 
+(defpackage :2302_P08_76208
 (:use :common-lisp :conecta4)
 (:export :heuristica :*alias*))
 
-(in-package 2302_P08_5add0)
-(defvar *alias* '|tuSicaria|) 
+(in-package 2302_P08_76208)
+(defvar *alias* '|traketeo|) 
 
 (defun heuristica (estado)
   ; current player standpoint
@@ -130,8 +130,8 @@
 		(setf puntuacion-actual
 		      (+ puntuacion-actual
 			  ;Miramos si estan libres las columnas del medio de la primera fila
-			 (if (and (= fila 0) (= columna 3) (null (obtener-ficha tablero columna fila))) 5000
-				(if (and (= fila 0) (or (= columna 4)(= columna 2)) (null (obtener-ficha tablero columna fila))) 3000
+			 (if (and (= fila 0) (= columna 3) (null (obtener-ficha tablero columna fila))) 6000
+				(if (and (= fila 0) (or (= columna 4)(= columna 2)) (null (obtener-ficha tablero columna fila))) 5000
 			 
 			 ; ;Miramos que no haya otra ficha encima
 			 (if (< fila 5)
@@ -139,7 +139,7 @@
 				 (cond ((= abajo 0) 0)
 					   ((= abajo 1) 10)
 					   ((= abajo 2) 100)
-					   ((= abajo 3) 1000)
+					   ((= abajo 3) 6000)
 					   (t 0))
 					   0)
 			  0)))
@@ -150,7 +150,7 @@
 						(cond ((= (+ der izq) 0) 0)
 						 ((= (+ der izq) 1) 100)
 					     ((= (+ der izq) 2) 100)
-					     ((= (+ der izq) 3) 1000)
+					     ((= (+ der izq) 3) 6000)
 						 (t 0))
 					0)
 			  0)
@@ -161,7 +161,7 @@
 						(cond ((= (+ der izq) 0) 0)
 						 ((= (+ der izq) 1) 100)
 					     ((= (+ der izq) 2) 100)
-					     ((= (+ der izq) 3) 1000)
+					     ((= (+ der izq) 3) 6000)
 						 (t 0))
 					0)
 			  0)
@@ -174,7 +174,7 @@
 						(cond ((= (+ abajo-der arriba-izq) 0) 0)
 						   ((= (+ abajo-der arriba-izq) 1) 100)
 						   ((= (+ abajo-der arriba-izq) 2) 100)
-						   ((= (+ abajo-der arriba-izq) 3) 1000)
+						   ((= (+ abajo-der arriba-izq) 3) 2000)
 						   (t 0))
 					0)
 				0)
@@ -186,7 +186,7 @@
 						   ((= (+ abajo-der arriba-izq) 1) 100)
 						   ((= (+ abajo-der arriba-izq) 2) 100)
 						   ((= (+ abajo-der arriba-izq) 3) 
-								(if (= fila 1) 5000 
+								(if (= fila 1) 6000 
 								1000))
 							(t 0))
 					0)
@@ -199,7 +199,7 @@
 						(cond ((= (+ abajo-izq arriba-der) 0) 0)
 						((= (+ abajo-izq arriba-der) 1) 100)
 						((= (+ abajo-izq arriba-der) 2) 100)
-						((= (+ abajo-izq arriba-der) 3) 1000)
+						((= (+ abajo-izq arriba-der) 3) 2000)
 						(t 0))
 					0)
 				0)
@@ -211,7 +211,7 @@
 						   ((= (+ abajo-izq arriba-der) 1) 100)
 						   ((= (+ abajo-izq arriba-der) 2) 100)
 						   ((= (+ abajo-izq arriba-der) 3) 
-								(if (= fila 1) 5000 ;Solo tendria que colocar ahi la ficha para ganar
+								(if (= fila 1) 6000 ;Solo tendria que colocar ahi la ficha para ganar
 								1000))
 							(t 0))
 					0)
