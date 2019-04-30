@@ -1,0 +1,214 @@
+(defpackage :2302_P08_c3139
+(:use :common-lisp :conecta4)
+(:export :heuristica :*alias*))
+
+(in-package 2302_P08_c3139)
+(defvar *alias* '|Consecutive normal punches|) 
+
+(defun heuristica (estado)
+  ; current player standpoint
+  (let* ((tablero (estado-tablero estado))
+	 (ficha-actual (estado-turno estado))
+	 (ficha-oponente (siguiente-jugador ficha-actual)))
+    (if (juego-terminado-p estado)
+	(let ((ganador (ganador estado)))
+	  (cond ((not ganador) 0)
+		((eql ganador ficha-actual) +val-max+)
+		(t +val-min+)))
+      (let ((puntuacion-actual 0)
+	    (puntuacion-oponente 0))
+	(loop for columna from 0 below (tablero-ancho tablero) do
+		(loop for fila from 0 below (tablero-alto tablero) do
+	      (let* ((altura (altura-columna tablero columna))
+		     ;(fila (1- altura))
+		     (abajo (contar-abajo tablero ficha-actual columna fila))
+		     (der (contar-derecha tablero ficha-actual columna fila))
+		     (izq (contar-izquierda tablero ficha-actual columna fila))
+		     (abajo-der (contar-abajo-derecha tablero ficha-actual columna fila))
+		     (arriba-izq (contar-arriba-izquierda tablero ficha-actual columna fila))
+		     (abajo-izq (contar-abajo-izquierda tablero ficha-actual columna fila))
+		     (arriba-der (contar-arriba-derecha tablero ficha-actual columna fila)))
+		(setf puntuacion-actual
+		      (+ puntuacion-actual
+			  
+			  ;Priorizamos columna del medio, excepto la fila limite
+			  ; Despues las esquinas
+			  (if (< fila 6 )
+				(if (null (obtener-ficha tablero 3 fila)) 10000
+				0)
+				(if (or (null (obtener-ficha tablero 5 0))(null (obtener-ficha tablero 0 0))) 7000
+				0))
+				
+				(if (> fila 1) (if (and (>= (+ der izq) 3) (null (obtener-ficha tablero columna (- fila 1)))) 8000
+					0)
+				0)
+				
+			  
+			  ;Miramos si hay una ficha del adversario a la izquierda
+			  (if (> columna 1) 
+					(if (null (obtener-ficha tablero (- columna 2) fila))
+						(cond ((= (+ der izq) 0) 0)
+						 ((= (+ der izq) 1) 100)
+					     ((= (+ der izq) 2) 100)
+					     ((= (+ der izq) 3) 1000)
+						 (t 0))
+					0)
+			  0)
+			  
+			  ;Miramos si hay una ficha del adversario a la derecha
+			  (if (< columna 5) 
+					(if (null (obtener-ficha tablero (+ columna 2) fila))
+						(cond ((= (+ der izq) 0) 0)
+						 ((= (+ der izq) 1) 100)
+					     ((= (+ der izq) 2) 100)
+					     ((= (+ der izq) 3) 1000)
+						 (t 0))
+					0)
+			  0)
+			  
+			  
+			  ;DIAGONAL ABAJO_DER-ARRIBA_IZQ
+				;Miramos que no haya una ficha del adversario que impida la linea por la izquierda
+				(if (and (> columna 1) (< fila 4))
+					(if (null (obtener-ficha tablero (- columna 2) (+ fila 2)))
+						(cond ((= (+ abajo-der arriba-izq) 0) 0)
+						   ((= (+ abajo-der arriba-izq) 1) 100)
+						   ((= (+ abajo-der arriba-izq) 2) 100)
+						   ((= (+ abajo-der arriba-izq) 3) 1000)
+						   (t 0))
+					0)
+				0)
+				
+			 ;Miramos que no haya una ficha del adversario que impida la linea por la derecha
+				(if (and (< columna 4) (> fila 1))
+					(if (null (obtener-ficha tablero (+ columna 2) (- fila 2))) 
+						(cond ((= (+ abajo-der arriba-izq) 0) 0)
+						   ((= (+ abajo-der arriba-izq) 1) 100)
+						   ((= (+ abajo-der arriba-izq) 2) 100)
+						   ((= (+ abajo-der arriba-izq) 3) 
+								(if (= fila 1) 5000 
+								1000))
+							(t 0))
+					0)
+				0)
+				
+			 ;DIAGONAL ABAJO_IZQ-ARRIBA_DER
+				;Miramos que no haya una ficha del adversario que impida la linea por la derecha
+				(if (and (< columna 4) (< fila 4)) 
+					(if (null (obtener-ficha tablero (+ columna 2) (+ 2 fila)))
+						(cond ((= (+ abajo-izq arriba-der) 0) 0)
+						((= (+ abajo-izq arriba-der) 1) 100)
+						((= (+ abajo-izq arriba-der) 2) 100)
+						((= (+ abajo-izq arriba-der) 3) 1000)
+						(t 0))
+					0)
+				0)
+				
+				;Miramos que no haya una ficha del adversario que impida la linea por la izquierda
+				(if (and (> columna 1) (> fila 1))
+					(if (null (obtener-ficha tablero (- columna 2) (- fila 2)))
+						(cond ((= (+ abajo-der arriba-izq) 0) 0)
+						   ((= (+ abajo-izq arriba-der) 1) 100)
+						   ((= (+ abajo-izq arriba-der) 2) 100)
+						   ((= (+ abajo-izq arriba-der) 3) 
+								(if (= fila 1) 5000 ;Solo tendria que colocar ahi la ficha para ganar
+								1000))
+							(t 0))
+					0)
+				0)
+				)))
+	      (let* ((altura (altura-columna tablero columna))
+		     ;(fila (1- altura))
+		     (abajo (contar-abajo tablero ficha-actual columna fila))
+		     (der (contar-derecha tablero ficha-actual columna fila))
+		     (izq (contar-izquierda tablero ficha-actual columna fila))
+		     (abajo-der (contar-abajo-derecha tablero ficha-actual columna fila))
+		     (arriba-izq (contar-arriba-izquierda tablero ficha-actual columna fila))
+		     (abajo-izq (contar-abajo-izquierda tablero ficha-actual columna fila))
+		     (arriba-der (contar-arriba-derecha tablero ficha-actual columna fila)))
+		(setf puntuacion-actual
+		      (+ puntuacion-actual
+			  
+			   (if (< fila 6 )
+				(if (null (obtener-ficha tablero 3 fila)) 10000
+				0)
+				(if (or (null (obtener-ficha tablero 5 0))(null (obtener-ficha tablero 0 0))) 7000
+				0))
+			  
+			  (if (> fila 1) (if (and (>= (+ der izq) 3) (null (obtener-ficha tablero columna (- fila 1)))) 8000
+					0)
+				0)
+			  
+			  ;Miramos si hay una ficha del adversario a la izquierda
+			  (if (> columna 1) 
+					(if (null (obtener-ficha tablero (- columna 2) fila))
+						(cond ((= (+ der izq) 0) 0)
+						 ((= (+ der izq) 1) 100)
+					     ((= (+ der izq) 2) 100)
+					     ((= (+ der izq) 3) 6000)
+						 (t 0))
+					0)
+			  0)
+			  
+			  ;Miramos si hay una ficha del adversario a la derecha
+			  (if (< columna 5) 
+					(if (null (obtener-ficha tablero (+ columna 2) fila))
+						(cond ((= (+ der izq) 0) 0)
+						 ((= (+ der izq) 1) 100)
+					     ((= (+ der izq) 2) 100)
+					     ((= (+ der izq) 3) 6000)
+						 (t 0))
+					0)
+			  0)
+			  
+			  
+			  ;DIAGONAL ABAJO_DER-ARRIBA_IZQ
+				;Miramos que no haya una ficha del adversario que impida la linea por la izquierda
+				(if (and (> columna 1) (< fila 4))
+					(if (null (obtener-ficha tablero (- columna 2) (+ fila 2)))
+						(cond ((= (+ abajo-der arriba-izq) 0) 0)
+						   ((= (+ abajo-der arriba-izq) 1) 100)
+						   ((= (+ abajo-der arriba-izq) 2) 100)
+						   ((= (+ abajo-der arriba-izq) 3) 2000)
+						   (t 0))
+					0)
+				0)
+				
+			 ;Miramos que no haya una ficha del adversario que impida la linea por la derecha
+				(if (and (< columna 4) (> fila 1))
+					(if (null (obtener-ficha tablero (+ columna 2) (- fila 2))) 
+						(cond ((= (+ abajo-der arriba-izq) 0) 0)
+						   ((= (+ abajo-der arriba-izq) 1) 100)
+						   ((= (+ abajo-der arriba-izq) 2) 100)
+						   ((= (+ abajo-der arriba-izq) 3) 
+								(if (= fila 1) 6000 
+								1000))
+							(t 0))
+					0)
+				0)
+				
+			 ;DIAGONAL ABAJO_IZQ-ARRIBA_DER
+				;Miramos que no haya una ficha del adversario que impida la linea por la derecha
+				(if (and (< columna 4) (< fila 4)) 
+					(if (null (obtener-ficha tablero (+ columna 2) (+ 2 fila)))
+						(cond ((= (+ abajo-izq arriba-der) 0) 0)
+						((= (+ abajo-izq arriba-der) 1) 100)
+						((= (+ abajo-izq arriba-der) 2) 100)
+						((= (+ abajo-izq arriba-der) 3) 2000)
+						(t 0))
+					0)
+				0)
+				
+				;Miramos que no haya una ficha del adversario que impida la linea por la izquierda
+				(if (and (> columna 1) (> fila 1))
+					(if (null (obtener-ficha tablero (- columna 2) (- fila 2)))
+						(cond ((= (+ abajo-der arriba-izq) 0) 0)
+						   ((= (+ abajo-izq arriba-der) 1) 100)
+						   ((= (+ abajo-izq arriba-der) 2) 100)
+						   ((= (+ abajo-izq arriba-der) 3) 
+								(if (= fila 1) 6000 ;Solo tendria que colocar ahi la ficha para ganar
+								1000))
+							(t 0))
+					0)
+				0))))))
+	(- puntuacion-actual puntuacion-oponente)))))
